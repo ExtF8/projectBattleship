@@ -1,4 +1,40 @@
 /**
+ *
+ * Enum for ship types
+ * @readonly
+ * @enum {string}
+ */
+const ShipTypes = {
+    CARRIER: 'CARRIER',
+    BATTLESHIP: 'BATTLESHIP',
+    DESTROYER: 'DESTROYER',
+    SUBMARINE: 'SUBMARINE',
+    PATROL_BOAT: 'PATROL_BOAT',
+};
+
+/**
+ *
+ * Data for each ship type, including id, title, and length.
+ * @typedef {Object} ShipInfo
+ * @property {number} id - The ID of the ship.
+ * @property {string} title - The title of the ship class.
+ * @property {number} length - The length of the ship.
+ */
+
+/**
+ *
+ * Object containing data for each ship type.
+ * @type {Object<string, ShipInfo>}
+ */
+const ShipData = {
+    [ShipTypes.CARRIER]: { id: 1, title: 'Carrier', length: 5 },
+    [ShipTypes.BATTLESHIP]: { id: 2, title: 'Battleship', length: 4 },
+    [ShipTypes.DESTROYER]: { id: 3, title: 'Destroyer', length: 3 },
+    [ShipTypes.SUBMARINE]: { id: 4, title: 'Submarine', length: 3 },
+    [ShipTypes.PATROL_BOAT]: { id: 5, title: 'Patrol Boat', length: 2 },
+};
+
+/**
  * Represents a Ship.
  *
  * @class
@@ -6,15 +42,47 @@
 export class Ship {
     /**
      *
-     * @param { number } id - The ID of the ship.
-     * @param { string } shipClass - Type of the Ships class, e.g., Carrier/Submarine/Cruiser/Destroyer/Patrol Boat.
-     * @param { number } length - Length/Size of the Ship according to its class.
+     * @type {Object<string, string>}
+     * @static
      */
-    constructor(id, shipClass, length) {
+    static Types = ShipTypes;
+
+    /**
+     *
+     * @type {Object<string, ShipInfo>}
+     * @static
+     */
+    static Data = ShipData;
+
+    /**
+     *
+     * Creates an instance of Ship.
+     * @param {number} id - The ID of the ship.
+     * @param {string} title - The class title of the ship.
+     * @param {number} length - The length of the ship.
+     */
+    constructor(id, title, length) {
         this.id = id;
-        this.shipClass = shipClass;
+        this.title = title;
         this.length = length;
         this.hits = 0;
+    }
+
+    /**
+     *
+     * Static factory method to create a ship of a given type.
+     * @param {string} shipType - The type of ship to create (must be a key in Ship.Types).
+     * @returns {Ship} - A new Ship instance.
+     * @throws {Error} - If the ship type is invalid.
+     */
+    static create(shipType) {
+        const shipInfo = Ship.Data[shipType];
+
+        if (!shipInfo) {
+            throw new Error(`Invalid ship type: ${shipType}`);
+        }
+
+        return new Ship(shipInfo.id, shipInfo.title, shipInfo.length);
     }
 
     /**
@@ -30,6 +98,10 @@ export class Ship {
      * @returns { boolean } - Returns true if the Ship is sunk, otherwise false.
      */
     isSunk() {
-        return this.hits === this.length;
+        let isSunk = false;
+        if (this.hits === this.length) {
+            isSunk = true;
+        }
+        return isSunk;
     }
 }
