@@ -1,0 +1,11 @@
+{
+  "name": "projectbattleship",
+  "version": "1.0.0",
+  "description": "Test Driven Development course, implementation of the game Battleship.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "ExtF8",
+  "license": "ISC"
+}
