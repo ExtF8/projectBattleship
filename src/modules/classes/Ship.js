@@ -105,3 +105,30 @@ export class Ship {
         return isSunk;
     }
 }
+
+export class ShipManager {
+    constructor() {
+        this.ships = [];
+    }
+
+    addShip(ship) {
+        this.ships.push(ship);
+    }
+
+    removeShip(id) {
+        const index = this.ships.findIndex(ship => ship.id === id);
+        if (index !== -1) {
+            this.ships.splice(index, 1);
+            return true;
+        }
+        return false;
+    }
+
+    findShipById(id){
+        return this.ships.find(ship => ship.id === id) || null
+    }
+
+    listShips() {
+        return this.ships;
+    }
+}
