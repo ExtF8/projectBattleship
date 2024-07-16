@@ -106,17 +106,35 @@ export class Ship {
     }
 }
 
-
+/**
+ * Represents Ship Manager.
+ *
+ * @class
+ */
 export class ShipManager {
-
+    /**
+     * Creates instance of ShipManager.
+     *
+     */
     constructor() {
         this.ships = [];
     }
 
+    /**
+     * Adds a new ship to the manager.
+     *
+     * @param {Ship} ship - Ship to be added.
+     */
     addShip(ship) {
         this.ships.push(ship);
     }
 
+    /**
+     * Removes a ship from the manager by ID.
+     *
+     * @param {number} id - The ID of the ship to be removed.
+     * @returns {boolean} - Return true if a ship is removed, otherwise false.
+     */
     removeShip(id) {
         const index = this.ships.findIndex(ship => ship.id === id);
         if (index !== -1) {
@@ -155,6 +173,6 @@ export class ShipManager {
     }
 
     clearShips() {
-        return this.ships = []
+        return (this.ships = []);
     }
 }
