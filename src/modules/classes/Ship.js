@@ -106,7 +106,9 @@ export class Ship {
     }
 }
 
+
 export class ShipManager {
+
     constructor() {
         this.ships = [];
     }
@@ -124,11 +126,35 @@ export class ShipManager {
         return false;
     }
 
-    findShipById(id){
-        return this.ships.find(ship => ship.id === id) || null
+    findShipById(id) {
+        return this.ships.find(ship => ship.id === id) || null;
     }
 
     listShips() {
         return this.ships;
+    }
+
+    getActiveShips() {
+        return this.ships.filter(ship => !ship.isSunk());
+    }
+
+    getSunkShips() {
+        return this.ships.filter(ship => ship.isSunk());
+    }
+
+    getTotalShips() {
+        return this.ships.length;
+    }
+
+    getActiveShipCount() {
+        return this.getActiveShips().length;
+    }
+
+    getSunkShipCount() {
+        return this.getSunkShips().length;
+    }
+
+    clearShips() {
+        return this.ships = []
     }
 }
