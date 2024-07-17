@@ -144,35 +144,75 @@ export class ShipManager {
         return false;
     }
 
+    /**
+     * Finds ship by its ID.
+     *
+     * @param {number} id - The ID of the ship to find
+     * @returns {Ship|null} - The ship with the specified ID, otherwise null.
+     */
     findShipById(id) {
         return this.ships.find(ship => ship.id === id) || null;
     }
 
+    /**
+     * Lists all ships in the manager.
+     *
+     * @returns {Ship[]} - An array of all ships.
+     */
     listShips() {
         return this.ships;
     }
 
+    /**
+     * Lists all active (not sunk) ships in the manager.
+     *
+     * @returns {Ship[]} - An array of all active ships.
+     */
     getActiveShips() {
         return this.ships.filter(ship => !ship.isSunk());
     }
 
+    /**
+     * Lists all sunk ships in the manager.
+     *
+     * @returns {Ship[]} - An array af all sunk ships.
+     */
     getSunkShips() {
         return this.ships.filter(ship => ship.isSunk());
     }
 
-    getTotalShips() {
-        return this.ships.length;
-    }
-
+    /**
+     * Gets the number of active (not sunk) ships in the manager.
+     *
+     * @returns {number} - The number of active ships.
+     */
     getActiveShipCount() {
         return this.getActiveShips().length;
     }
 
+    /**
+     * Gets the number of sunk ships in the manager.
+     *
+     * @returns {number} - The number of sunk ships.
+     */
     getSunkShipCount() {
         return this.getSunkShips().length;
     }
 
+    /**
+     * Gets the total number of ships in the manager.
+     *
+     * @returns {number} -Total number of the ships.
+     */
+    getTotalShips() {
+        return this.ships.length;
+    }
+
+    /**
+     * Removes all ships from the manager.
+     *
+     */
     clearShips() {
-        return (this.ships = []);
+        this.ships = [];
     }
 }
