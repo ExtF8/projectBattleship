@@ -69,14 +69,15 @@ describe.only('Ship manager', () => {
     test('should add a new ship', () => {
         shipManager.addShip(battleship);
 
-        expect(shipManager.listShips()).toContain(battleship);
+        const addShip = shipManager.listShips()
+        expect(addShip).toContain(battleship);
     });
 
     test('should remove a ship by its id', () => {
         shipManager.addShip(carrier);
         shipManager.addShip(battleship);
-        const removed = shipManager.removeShip(carrier.id);
 
+        const removed = shipManager.removeShip(carrier.id);
         expect(removed).toBe(true);
         expect(shipManager.listShips()).not.toContain(carrier);
     });
@@ -114,40 +115,58 @@ describe.only('Ship manager', () => {
     test('should get all active ships', () => {
         shipManager.addShip(battleship);
 
-        expect(shipManager.getActiveShips()).toContain(battleship);
+        const activeShips = shipManager.getActiveShips();
+        expect(activeShips).toContain(battleship);
     });
 
     test('should get all sunk ships', () => {
+        shipManager.addShip(patrolBoat);
+        patrolBoat.hit();
+        patrolBoat.hit();
+
+        const sunkShips = shipManager.getSunkShips();
+        expect(sunkShips).toContain(patrolBoat);
+    });
+
+    test('should get active ships count', () => {
+        shipManager.addShip(battleship);
+        battleship.hit();
+
+        const activeShipCount = shipManager.getActiveShipCount();
+        expect(activeShipCount).toBe(1);
+    });
+
+    test('should get sunk ship count', () => {
+        shipManager.addShip(battleship);
         shipManager.addShip(patrolBoat);
 
         patrolBoat.hit();
         patrolBoat.hit();
 
-        expect(shipManager.getSunkShips()).toContain(patrolBoat);
+        const sunkShipCount = shipManager.getSunkShipCount();
+        expect(sunkShipCount).toBe(1);
     });
 
     test('should get total count of ships ', () => {
-        shipManager.addShip(battleship)
-        shipManager.addShip(patrolBoat)
-        shipManager.addShip(carrier)
+        shipManager.addShip(battleship);
+        shipManager.addShip(patrolBoat);
+        shipManager.addShip(carrier);
 
-        expect(shipManager.getTotalShips()).toBe(3)
+        const totalShipsCount = shipManager.getTotalShips();
+        expect(totalShipsCount).toBe(3);
     });
 
-    test('should get active ships count', () => {
-        shipManager.addShip(battleship)
-        battleship.hit()
+    test('should clear all ships', () => {
+        shipManager.addShip(battleship);
+        shipManager.addShip(patrolBoat);
+        shipManager.addShip(carrier);
 
-        expect(shipManager.getActiveShipCount()).toBe(1)
-    })
+        let listShips = shipManager.listShips();
 
-    test('should get sunk ship count', () => {
-        shipManager.addShip(battleship)
-        shipManager.addShip(patrolBoat)
+        shipManager.clearShips();
 
-        patrolBoat.hit()
-        patrolBoat.hit()
+        listShips = shipManager.listShips();
 
-        expect(shipManager.getSunkShipCount()).toBe(1)
-    })
+        expect(listShips).toEqual([]);
+    });
 });
