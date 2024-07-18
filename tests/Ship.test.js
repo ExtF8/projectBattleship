@@ -53,7 +53,7 @@ describe('Ship methods', () => {
     });
 });
 
-describe.only('Ship manager', () => {
+describe('Ship manager', () => {
     let shipManager;
     let carrier;
     let battleship;
@@ -69,7 +69,7 @@ describe.only('Ship manager', () => {
     test('should add a new ship', () => {
         shipManager.addShip(battleship);
 
-        const addShip = shipManager.listShips()
+        const addShip = shipManager.listShips();
         expect(addShip).toContain(battleship);
     });
 
@@ -161,12 +161,8 @@ describe.only('Ship manager', () => {
         shipManager.addShip(patrolBoat);
         shipManager.addShip(carrier);
 
-        let listShips = shipManager.listShips();
-
         shipManager.clearShips();
-
-        listShips = shipManager.listShips();
-
+        let listShips = shipManager.listShips();
         expect(listShips).toEqual([]);
     });
 });
