@@ -4,7 +4,13 @@ export function logGrid(grid) {
         const rowObj = {};
         row.forEach((cell, cellIndex) => {
             rowObj[letters[cellIndex]] =
-                cell === null ? 'null' : `{${cell.title}}`;
+                cell === null
+                    ? 'null'
+                    : cell === 'hit'
+                    ? '{hit}'
+                    : cell === 'miss'
+                    ? 'miss'
+                    : `{${cell.title}}`;
         });
         return rowObj;
     });
