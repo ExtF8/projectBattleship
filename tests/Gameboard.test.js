@@ -22,8 +22,6 @@ describe.only('Gameboard', () => {
         patrolBoat = Ship.create(Ship.Types.PATROL_BOAT);
     });
 
-    
-
     afterEach(() => {
         logGrid(gameboard.grid);
     });
@@ -31,16 +29,15 @@ describe.only('Gameboard', () => {
     test('should place ships at specific coordinates', () => {
         gameboard.placeShip(carrier, 'A', 1, 'vertical');
         gameboard.placeShip(battleship, 'B', 2, 'vertical');
-        gameboard.placeShip(destroyer, 'C', 3, 'vertical')
+        gameboard.placeShip(destroyer, 'C', 3, 'vertical');
         gameboard.placeShip(submarine, 'D', 4, 'vertical');
         gameboard.placeShip(patrolBoat, 'E', 5, 'vertical');
 
         expect(gameboard.getShipAt('A', 1).id).toBe(carrier.id);
         expect(gameboard.getShipAt('B', 2).id).toBe(battleship.id);
-        expect(gameboard.getShipAt('C', 3).id).toBe(destroyer.id)
+        expect(gameboard.getShipAt('C', 3).id).toBe(destroyer.id);
         expect(gameboard.getShipAt('D', 4).id).toBe(submarine.id);
         expect(gameboard.getShipAt('E', 5).id).toBe(patrolBoat.id);
     });
 });
 // test('should receive attack on specified coordinates', () => {});
-
