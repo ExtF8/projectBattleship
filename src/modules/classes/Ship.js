@@ -55,8 +55,15 @@ export class Ship {
     static Data = ShipData;
 
     /**
+     * Default ShipManager instance.
      *
+     * @type {ShipManager||null}
+     */
+    static defaultShipManager = null;
+
+    /**
      * Creates an instance of Ship.
+     *
      * @param {number} id - The ID of the ship.
      * @param {string} title - The class title of the ship.
      * @param {number} length - The length of the ship.
@@ -69,24 +76,36 @@ export class Ship {
     }
 
     /**
-     *
      * Static factory method to create a ship of a given type.
+     *
      * @param {string} shipType - The type of ship to create (must be a key in Ship.Types).
+     * @param {ShipManager} [shipManager=Ship.defaultShipManager] - The ShipManager instance to add the created ship to.
      * @returns {Ship} - A new Ship instance.
      * @throws {Error} - If the ship type is invalid.
+     * @example
+     * // Initialize the ShipManager before calling create method
+     * const shipManager = new ShipManager();
+     * Ship.defaultShipManager = shipManager;
      */
-    static create(shipType) {
+    static create(shipType, shipManager = Ship.defaultShipManager) {
         const shipInfo = Ship.Data[shipType];
 
         if (!shipInfo) {
             throw new Error(`Invalid ship type: ${shipType}`);
         }
 
-        return new Ship(shipInfo.id, shipInfo.title, shipInfo.length);
+        const newShip = new Ship(shipInfo.id, shipInfo.title, shipInfo.length);
+
+        if (shipManager) {
+            shipManager.addShip(newShip);
+        }
+
+        return newShip;
     }
 
     /**
      * Counter method for tracking how many times the Ship has been hit.
+     *
      */
     hit() {
         this.hits += 1;
