@@ -7,12 +7,12 @@ export class Gameboard {
     }
 
     createEmptyGrid(size) {
-        let grid = Array.from({ length: size }, () => Array(size).fill(null));
+        const grid = Array.from({ length: size }, () => Array(size).fill(null));
         return grid;
     }
 
     letterToIndex(letter) {
-        return letter.charCodeAt(0) - 'A'.charCodeAt(0);
+        return letter.charCodeAt() - 'A'.charCodeAt(0);
     }
 
     placeShip(ship, startLetter, startNumber, direction) {
@@ -32,27 +32,6 @@ export class Gameboard {
         const x = this.letterToIndex(letter);
         const y = number - 1;
 
-        return this.grid[x][y];
+        return this.grid[y][x];
     }
 }
-
-function logGrid(grid) {
-    grid.forEach(row => {
-        console.log(
-            row
-                .map(cell => (cell === null ? 'null' : `{${cell.title}}`))
-                .join(', ')
-        );
-    });
-}
-
-const gameboard = new Gameboard(1);
-
-const carrier = Ship.create(Ship.Types.CARRIER);
-// Action
-gameboard.placeShip(carrier, 'B', 1, 'horizontal');
-
-const patrol = Ship.create(Ship.Types.PATROL_BOAT);
-gameboard.placeShip(patrol, 'B', 3, 'vertical');
-
-logGrid(gameboard.grid);
