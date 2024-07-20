@@ -16,8 +16,7 @@ export class Gameboard {
     }
 
     placeShip(ship, startLetter, startNumber, direction) {
-        const x = this.letterToIndex(startLetter);
-        const y = startNumber - 1;
+        const [x, y] = this.#convertCoordinates(startLetter, startNumber);
 
         for (let i = 0; i < ship.length; i++) {
             if (direction === 'horizontal') {
@@ -29,16 +28,14 @@ export class Gameboard {
     }
 
     getShipAt(letter, number) {
-        const x = this.letterToIndex(letter);
-        const y = number - 1;
+        const [x, y] = this.#convertCoordinates(letter, number);
 
         return this.grid[y][x];
     }
 
     receiveAttack(coordinates = []) {
         const [letter, number] = coordinates;
-        const x = this.letterToIndex(letter);
-        const y = number - 1;
+        const [x, y] = this.#convertCoordinates(letter, number);
         let hit = false;
         let target = this.getShipAt(letter, number);
 
@@ -52,5 +49,20 @@ export class Gameboard {
             this.grid[y][x] = 'hit';
         }
         return hit;
+    }
+
+    /**
+     * Converts grid coordinates form letter and number to x and y indices.
+     *
+     * @private
+     * @param {string} letter - The letter representing the column, e.g., (A-J).
+     * @param {number} number - The number representing the row, e.g., (1-10).
+     * @returns {number[]} - An array containing the x and y indices.
+     */
+    #convertCoordinates(letter, number) {
+        const x = this.letterToIndex(letter);
+        const y = number - 1;
+
+        return [x, y];
     }
 }
