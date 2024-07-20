@@ -1,4 +1,4 @@
-import { Ship } from './Ship';
+import { Ship, ShipManager } from './Ship';
 export class Gameboard {
     constructor(id, size = 10) {
         this.id = id;
@@ -33,5 +33,24 @@ export class Gameboard {
         const y = number - 1;
 
         return this.grid[y][x];
+    }
+
+    receiveAttack(coordinates = []) {
+        const [letter, number] = coordinates;
+        const x = this.letterToIndex(letter);
+        const y = number - 1;
+        let hit = false;
+        let target = this.getShipAt(letter, number);
+
+        if (target === null) {
+            this.missedAttacks.push([letter, number]);
+            hit = false;
+            this.grid[y][x] = 'miss';
+        } else if (target instanceof Ship) {
+            target.hit();
+            hit = true;
+            this.grid[y][x] = 'hit';
+        }
+        return hit;
     }
 }
