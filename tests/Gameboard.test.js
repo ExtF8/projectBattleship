@@ -4,7 +4,6 @@ import { Ship } from '../src/modules/classes/Ship';
 describe.only('Gameboard', () => {
     test('should place a ship at specific coordinates', () => {
         const gameboard = new Gameboard(1);
-
         const carrier = Ship.create(Ship.Types.CARRIER);
         const patrolBoat = Ship.create(Ship.Types.PATROL_BOAT);
 
@@ -13,5 +12,6 @@ describe.only('Gameboard', () => {
 
         expect(gameboard.getShipAt('A', 1)).toBe(carrier);
         expect(gameboard.getShipAt('B', 2)).toBe(patrolBoat);
+
     });
 });
