@@ -3,6 +3,7 @@ export class Gameboard {
     constructor(id, size = 10) {
         this.id = id;
         this.grid = this.createEmptyGrid(size);
+        this.ships = [];
         this.missedAttacks = [];
     }
 
@@ -25,6 +26,7 @@ export class Gameboard {
                 this.grid[y + i][x] = ship;
             }
         }
+        this.ships.push(ship);
     }
 
     getShipAt(letter, number) {
@@ -48,7 +50,12 @@ export class Gameboard {
             hit = true;
             this.grid[y][x] = 'hit';
         }
+
         return hit;
+    }
+
+    allShipsSunk() {
+        return this.ships.every(ship => ship.isSunk);
     }
 
     /**
