@@ -27,11 +27,11 @@ const ShipTypes = {
  * @type {Object<string, ShipInfo>}
  */
 const ShipData = {
-    [ShipTypes.CARRIER]: { id: 1, title: 'Carrier', length: 5 },
-    [ShipTypes.BATTLESHIP]: { id: 2, title: 'Battleship', length: 4 },
-    [ShipTypes.DESTROYER]: { id: 3, title: 'Destroyer', length: 3 },
-    [ShipTypes.SUBMARINE]: { id: 4, title: 'Submarine', length: 3 },
-    [ShipTypes.PATROL_BOAT]: { id: 5, title: 'Patrol Boat', length: 2 },
+    [ShipTypes.CARRIER]: { id: 1, title: 'Carrier', length: 5, hits: 0 },
+    [ShipTypes.BATTLESHIP]: { id: 2, title: 'Battleship', length: 4, hits: 0 },
+    [ShipTypes.DESTROYER]: { id: 3, title: 'Destroyer', length: 3, hits: 0 },
+    [ShipTypes.SUBMARINE]: { id: 4, title: 'Submarine', length: 3, hits: 0 },
+    [ShipTypes.PATROL_BOAT]: { id: 5, title: 'Patrol Boat', length: 2, hits: 0 },
 };
 
 /**
@@ -94,7 +94,7 @@ export class Ship {
             throw new Error(`Invalid ship type: ${shipType}`);
         }
 
-        const newShip = new Ship(shipInfo.id, shipInfo.title, shipInfo.length);
+        const newShip = new Ship(shipInfo.id, shipInfo.title, shipInfo.length, shipInfo.hits);
 
         if (shipManager) {
             shipManager.addShip(newShip);
