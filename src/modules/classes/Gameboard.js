@@ -19,6 +19,12 @@ export class Gameboard {
     placeShip(ship, startLetter, startNumber, direction) {
         const [x, y] = this.#convertCoordinates(startLetter, startNumber);
 
+        // Validate the placement
+        if (!this.validatePlacement(ship, x, y, direction)) {
+            throw new Error('Invalid placement');
+        }
+
+        // Place the ship
         for (let i = 0; i < ship.length; i++) {
             if (direction === 'horizontal') {
                 this.grid[y][x + i] = ship;
@@ -27,6 +33,37 @@ export class Gameboard {
             }
         }
         this.ships.push(ship);
+    }
+
+    validatePlacement(ship, x, y, direction) {
+        if (direction === 'horizontal') {
+            // Ensure the ship fits horizontally within bounds
+            if (x + ship.length > this.size || y >= this.size) return false;
+            // Check each cell the ship would occupy
+            for (let i = 0; i < ship.length; i++) {
+                if (
+                    x + i >= this.size ||
+                    this.grid[y] === undefined ||
+                    this.grid[y][x + i] !== null
+                ) {
+                    return false;
+                }
+            }
+        } else if (direction === 'vertical') {
+            // Ensure the ship fits vertically within bounds
+            if (y + ship.length > this.size || x >= this.size) return false;
+            // Check each cell the ship would occupy
+            for (let i = 0; i < ship.length; i++) {
+                if (
+                    y + i >= this.size ||
+                    this.grid[y + i] === undefined ||
+                    this.grid[y + i][x] !== null
+                ) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     getShipAt(letter, number) {
@@ -69,7 +106,7 @@ export class Gameboard {
     #convertCoordinates(letter, number) {
         const x = this.letterToIndex(letter);
         const y = number - 1;
-
+        console.log(typeof x, y);
         return [x, y];
     }
 }
