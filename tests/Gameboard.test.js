@@ -101,6 +101,13 @@ describe.only('Gameboard', () => {
         gameboard.receiveAttack(['D', 5]);
         gameboard.receiveAttack(['D', 6]);
 
-        expect(gameboard.allShipsSunk()).toBe(true)
+        expect(gameboard.allShipsSunk()).toBe(true);
+    });
+
+    test.only('should not alow ships to be placed outside the grid', () => {
+        const outOfBoundsShip = Ship.create(Ship.Types.CARRIER);
+        expect(() =>
+            gameboard.placeShip(outOfBoundsShip, 'J', 10, 'vertical')
+        ).toThrow('Invalid placement');
     });
 });
