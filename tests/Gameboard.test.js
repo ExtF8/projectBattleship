@@ -104,10 +104,23 @@ describe.only('Gameboard', () => {
         expect(gameboard.allShipsSunk()).toBe(true);
     });
 
-    test.only('should not alow ships to be placed outside the grid', () => {
-        const outOfBoundsShip = Ship.create(Ship.Types.CARRIER);
+    test('should not alow ships to be placed outside the grid', () => {
+        const outOfBoundsShipVertical = Ship.create(Ship.Types.CARRIER);
+        const outOfBoundsShipHorizontal = Ship.create(Ship.Types.BATTLESHIP);
+
         expect(() =>
-            gameboard.placeShip(outOfBoundsShip, 'J', 10, 'vertical')
+            gameboard.placeShip(outOfBoundsShipVertical, 'J', 10, 'vertical')
+        ).toThrow('Invalid placement');
+        expect(() =>
+            gameboard.placeShip(outOfBoundsShipHorizontal, 'J', 1, 'horizontal')
+        ).toThrow('Invalid placement');
+    });
+
+    test('should not allow shipt to be placed overlapping another ship', () => {
+        const overlappingShip = Ship.create(Ship.Types.SUBMARINE);
+
+        expect(() =>
+            gameboard.placeShip(overlappingShip, 'C', 3, 'horizontal')
         ).toThrow('Invalid placement');
     });
 });
