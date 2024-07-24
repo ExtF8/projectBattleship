@@ -1,4 +1,10 @@
 import { Ship } from './Ship';
+
+/**
+ * Represents a Gameboard.
+ *
+ * @class
+ */
 export class Gameboard {
     constructor(id, size = 10) {
         this.id = id;
@@ -7,15 +13,36 @@ export class Gameboard {
         this.missedAttacks = [];
     }
 
+    /**
+     * Creates grid of specified size.
+     *
+     * @param {number} size - The size of the grid.
+     * @returns {Array<Array<null>>} - A two-dimensional array representing the grid.
+     */
     createEmptyGrid(size) {
         const grid = Array.from({ length: size }, () => Array(size).fill(null));
         return grid;
     }
 
+    /**
+     * Converts a letter to its corresponding index.
+     *
+     * @param {string} letter - A letter to convert
+     * @returns {number} - The index of the letter
+     */
     letterToIndex(letter) {
         return letter.charCodeAt() - 'A'.charCodeAt(0);
     }
 
+    /**
+     * Places the ship on the grid at the specified coordinates and direction.
+     *
+     * @param {Object} ship - The ship to place.
+     * @param {string} startLetter - The starting letter coordinate (column).
+     * @param {number} startNumber - The starting number coordinate (row).
+     * @param {string} direction - The direction to place the ship (horizontal or vertical).
+     * @throws {Error} - If placement is invalid.
+     */
     placeShip(ship, startLetter, startNumber, direction) {
         const [x, y] = this.#convertCoordinates(startLetter, startNumber);
 
@@ -35,6 +62,15 @@ export class Gameboard {
         this.ships.push(ship);
     }
 
+    /**
+     * Validates if the ship can be placed at the specified coordinates and direction
+     *
+     * @param {Object} ship - The ship to place.
+     * @param {number} x - The starting x-coordinate.
+     * @param {number} y - The starting y-coordinate.
+     * @param {string} direction - The direction to place the ship (horizontal or vertical).
+     * @returns {boolean} - True if placement is valid, otherwise false.
+     */
     validatePlacement(ship, x, y, direction) {
         if (direction === 'horizontal') {
             // Ensure the ship fits horizontally within bounds
@@ -66,12 +102,25 @@ export class Gameboard {
         return true;
     }
 
+    /**
+     * Retrieves the ship at the specified coordinates.
+     *
+     * @param {string} letter - The letter coordinate (column).
+     * @param {number} number - The number coordinate (row).
+     * @returns {Object||null} - The ship at coordinates, or null if none exists.
+     */
     getShipAt(letter, number) {
         const [x, y] = this.#convertCoordinates(letter, number);
 
         return this.grid[y][x];
     }
 
+    /**
+     * Records an attack at the specified coordinates.
+     *
+     * @param {Array} coordinates - The coordinates of the attack [letter, number].
+     * @returns {boolean} - True if the attack hit a ship, false otherwise.
+     */
     receiveAttack(coordinates = []) {
         const [letter, number] = coordinates;
         const [x, y] = this.#convertCoordinates(letter, number);
@@ -91,6 +140,11 @@ export class Gameboard {
         return hit;
     }
 
+    /**
+     * Checks if all the ships are sunk.
+     *
+     * @returns {boolean} - True if all ships are sunk, false otherwise.
+     */
     allShipsSunk() {
         return this.ships.every(ship => ship.isSunk);
     }
