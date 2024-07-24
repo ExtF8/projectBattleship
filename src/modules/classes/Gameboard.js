@@ -1,4 +1,4 @@
-import { Ship, ShipManager } from './Ship';
+import { Ship } from './Ship';
 export class Gameboard {
     constructor(id, size = 10) {
         this.id = id;
@@ -39,7 +39,7 @@ export class Gameboard {
         if (direction === 'horizontal') {
             // Ensure the ship fits horizontally within bounds
             if (x + ship.length > this.size || y >= this.size) return false;
-            // Check each cell the ship would occupy
+            // Check each cell the ship would occupy for overlap
             for (let i = 0; i < ship.length; i++) {
                 if (
                     x + i >= this.size ||
@@ -52,7 +52,7 @@ export class Gameboard {
         } else if (direction === 'vertical') {
             // Ensure the ship fits vertically within bounds
             if (y + ship.length > this.size || x >= this.size) return false;
-            // Check each cell the ship would occupy
+            // Check each cell the ship would occupy for overlap
             for (let i = 0; i < ship.length; i++) {
                 if (
                     y + i >= this.size ||
@@ -106,7 +106,7 @@ export class Gameboard {
     #convertCoordinates(letter, number) {
         const x = this.letterToIndex(letter);
         const y = number - 1;
-        console.log(typeof x, y);
+
         return [x, y];
     }
 }
