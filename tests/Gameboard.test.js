@@ -2,7 +2,7 @@ import { Gameboard } from '../src/modules/classes/Gameboard';
 import { Ship, ShipManager } from '../src/modules/classes/Ship';
 import { logGrid } from '../src/utility/logHelper';
 
-describe.only('Gameboard', () => {
+describe('Gameboard', () => {
     let shipManager;
     let gameboard;
     let carrier;
