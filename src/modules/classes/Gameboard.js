@@ -129,13 +129,15 @@ export class Gameboard {
 
         if (target === null) {
             this.missedAttacks.push([letter, number]);
+            // remove this bool
             hit = false;
             // this.markBoard(hit, coordinates);
+            // remove this
             this.grid[y][x] = this.markBoard(hit, coordinates);
         } else if (target instanceof Ship) {
             target.hit();
             hit = true;
-
+            // remove this
             this.grid[y][x] = this.markBoard(hit, coordinates);
         }
 
