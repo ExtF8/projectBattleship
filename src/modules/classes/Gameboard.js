@@ -130,14 +130,28 @@ export class Gameboard {
         if (target === null) {
             this.missedAttacks.push([letter, number]);
             hit = false;
-            this.grid[y][x] = 'miss';
+            // this.markBoard(hit, coordinates);
+            this.grid[y][x] = this.markBoard(hit, coordinates);
         } else if (target instanceof Ship) {
             target.hit();
             hit = true;
-            this.grid[y][x] = 'hit';
+
+            this.grid[y][x] = this.markBoard(hit, coordinates);
         }
 
         return hit;
+    }
+
+    markBoard(hit, coordinates = []) {
+        const [x, y] = coordinates;
+        let place = this.grid[y][x];
+        if (hit === true) {
+            place = 'hit';
+        } else {
+            place = 'miss';
+        }
+        console.log(place);
+        return place;
     }
 
     /**

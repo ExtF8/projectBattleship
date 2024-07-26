@@ -66,7 +66,8 @@ describe('Gameboard', () => {
     });
 
     test('should mark a ship as hit ', () => {
-        expect(gameboard.grid[1][1]).toBe('hit');
+        let test = gameboard.grid[1][1].hits
+        expect(test).toBe(1);
     });
 
     test('should mark board if hit was a miss', () => {
