@@ -10,8 +10,26 @@ export class Player {
 
     attack(opponent, coordinates = []) {
         const attack = opponent.gameboard.receiveAttack(coordinates);
-        let ship = opponent.gameboard.getShipAt(coordinates[0], coordinates[1]);
 
-        return ship.hits, attack;
+        return attack;
+    }
+
+    computerAttack(opponent) {
+        let coordinates;
+        let successfulAttack;
+
+        do {
+            coordinates = this.getRandomCoordinates();
+            successfulAttack = this.attack(opponent, coordinates);
+        } while (successfulAttack === undefined);
+
+        return coordinates;
+    }
+
+    getRandomCoordinates() {
+        const letters = 'ABCDEFGHIJ'.split('');
+        const letter = letters[Math.floor(Math.random() * letters.length)];
+        const number = Math.floor(Math.random() * 10) + 1;
+        return [letter, number];
     }
 }
