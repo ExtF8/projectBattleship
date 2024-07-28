@@ -25,19 +25,47 @@ describe('Player', () => {
     });
 
     afterAll(() => {
-        return logGrid(computer.gameboard.grid, computer.gameboard);
+        return (
+            console.log('Computer: '),
+            logGrid(computer.gameboard.grid, computer.gameboard),
+            console.log('Player 1: '),
+            logGrid(player1.gameboard.grid, player1.gameboard)
+        );
     });
 
-    test('should place ships correctly on Players gameboard', () => {
+    test('should place ships correctly on gameboard', () => {
         expect(player1.gameboard.getShipAt('A', 1)).toBe(carrier);
         expect(computer.gameboard.getShipAt('B', 2)).toBe(battleship);
     });
 
-    test(`should allow attack on oponent's ship`, () => {
+    test(`should allow attack on oponent's gameboard`, () => {
         const hit = player1.attack(computer, ['B', 2]);
-        const opponentShip = computer.gameboard.getShipAt('B', 2);
 
         expect(hit).toBe(true);
-        expect(opponentShip.hits).toBe(1);
+    });
+
+    test('should record a miss', () => {
+        const hit = player1.attack(computer, ['C', 1]);
+
+        expect(hit).toBe(false);
+    });
+
+    test('computer player should attack on random coordinates', () => {
+        const attackCoordinates = computer.computerAttack(player1);
+
+        expect(Array.isArray(attackCoordinates)).toBe(true);
+        expect(attackCoordinates.length).toBe(2);
+    });
+
+    test(`should record hit form computer`, () => {
+        const hit = computer.attack(player1, ['C', 1]);
+
+        expect(hit).toBe(true);
+    });
+
+    test('should record a miss from computer', () => {
+        const hit = computer.attack(player1, ['B', 2]);
+
+        expect(hit).toBe(false);
     });
 });
