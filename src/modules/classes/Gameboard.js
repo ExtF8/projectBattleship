@@ -11,7 +11,7 @@ export class Gameboard {
         this.grid = this.createEmptyGrid(size);
         this.ships = [];
         this.missedAttacks = [];
-        // add received attack coordinates []
+        this.successfulAttacks = [];
     }
 
     /**
@@ -45,7 +45,7 @@ export class Gameboard {
      * @throws {Error} - If placement is invalid.
      */
     placeShip(ship, startLetter, startNumber, direction) {
-        const [x, y] = this.#convertCoordinates(startLetter, startNumber);
+        const [x, y] = this.convertCoordinates(startLetter, startNumber);
 
         // Validate the placement
         if (!this.validatePlacement(ship, x, y, direction)) {
@@ -54,7 +54,7 @@ export class Gameboard {
 
         // Place the ship
         // for grid array y coordinate is first
-        // To make letters as cols and numbers as rows
+        // to make letters as cols and numbers as rows
         for (let i = 0; i < ship.length; i++) {
             if (direction === 'horizontal') {
                 this.grid[y][x + i] = ship;
@@ -113,9 +113,8 @@ export class Gameboard {
      * @returns {Object||null} - The ship at coordinates, or null if none exists.
      */
     getShipAt(letter, number) {
-        const [x, y] = this.#convertCoordinates(letter, number);
-        let shipAt = this.grid[y][x]
-        // console.log('Ship at: ', shipAt)
+        const [x, y] = this.convertCoordinates(letter, number);
+        let shipAt = this.grid[y][x];
         return shipAt;
     }
 
@@ -127,37 +126,18 @@ export class Gameboard {
      */
     receiveAttack(coordinates = []) {
         const [letter, number] = coordinates;
-        // const [x, y] = this.#convertCoordinates(letter, number);
         let hit = false;
         let target = this.getShipAt(letter, number);
 
         if (target === null) {
             this.missedAttacks.push([letter, number]);
-            this.markBoard(false, coordinates);
         } else if (target instanceof Ship) {
             target.hit();
-        // add received attack coordinates []
             hit = true;
-            // this.markBoard(true, coordinates);
-
+            this.successfulAttacks.push([letter, number]);
         }
 
         return hit;
-    }
-
-    // probably not needed
-    markBoard(hit, coordinates = []) {
-        coordinates = this.#convertCoordinates(coordinates[0], coordinates[1]);
-        const [x, y] = coordinates;
-        
-
-        if (hit !== true) {
-            this.grid[y][x] = 'miss';
-        } else {
-            this.grid[y][x] = 'hit';
-        }
-        // console.log('markBoard: ', this.grid[y][x]);
-        return this.grid[y][x]
     }
 
     /**
@@ -172,12 +152,11 @@ export class Gameboard {
     /**
      * Converts grid coordinates form letter and number to x and y indices.
      *
-     * @private
      * @param {string} letter - The letter representing the column, e.g., (A-J).
      * @param {number} number - The number representing the row, e.g., (1-10).
      * @returns {number[]} - An array containing the x and y indices.
      */
-    #convertCoordinates(letter, number) {
+    convertCoordinates(letter, number) {
         const x = this.letterToIndex(letter);
         const y = number - 1;
 
