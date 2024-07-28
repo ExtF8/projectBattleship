@@ -35,10 +35,7 @@ describe('Player', () => {
 
     test(`should allow attack on oponent's ship`, () => {
         const hit = player1.attack(computer, ['B', 2]);
-
         const opponentShip = computer.gameboard.getShipAt('B', 2);
-        // computer.gameboard.markBoard(hit, ['B', 2])
-        console.log('opponentShip: ', opponentShip);
 
         expect(hit).toBe(true);
         expect(opponentShip.hits).toBe(1);

@@ -10,10 +10,8 @@ export class Player {
 
     attack(opponent, coordinates = []) {
         const attack = opponent.gameboard.receiveAttack(coordinates);
-        console.log(coordinates)
-        console.log('attack: ', attack)
-        let ship = opponent.gameboard.getShipAt(coordinates[0], coordinates[1])
-        console.log('get ship: ', ship)
-        return ship.hits, attack
+        let ship = opponent.gameboard.getShipAt(coordinates[0], coordinates[1]);
+
+        return ship.hits, attack;
     }
 }
