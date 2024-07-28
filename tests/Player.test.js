@@ -25,7 +25,7 @@ describe('Player', () => {
     });
 
     afterAll(() => {
-        logGrid(computer.gameboard.grid);
+        return logGrid(computer.gameboard.grid, computer.gameboard);
     });
 
     test('should place ships correctly on Players gameboard', () => {
