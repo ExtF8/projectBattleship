@@ -5,6 +5,11 @@ export function logGrid(grid) {
     const table = grid.map(row => {
         const rowObj = {};
         row.forEach((cell, cellIndex) => {
+            // for loop for every missed attack array
+                // updates cell to 'miss'
+            // for loop for every hit attack array
+                // updates cell to cell.title + 'hit'
+
             // if (cell === null) {
             //     rowObj[letters[cellIndex]] = 'null';
             // } else if (cell === 'miss') {
