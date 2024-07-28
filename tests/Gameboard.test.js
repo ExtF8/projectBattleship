@@ -66,12 +66,15 @@ describe('Gameboard', () => {
     });
 
     test('should mark a ship as hit ', () => {
-        let test = gameboard.grid[1][1].hits
-        expect(test).toBe(1);
+        // y coordinate is first
+        let [x, y] = [1, 1]
+        expect(gameboard.grid[y][x]).toBe('hit');
     });
 
     test('should mark board if hit was a miss', () => {
-        expect(gameboard.grid[0][1]).toBe('miss');
+        // y coordinate is first
+        let [x, y] = [1, 0]
+        expect(gameboard.grid[y][x]).toBe('miss');
     });
 
     test('should report if the ship is sunk', () => {
