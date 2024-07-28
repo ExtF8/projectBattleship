@@ -1,25 +1,41 @@
 import { Ship } from '../modules/classes/Ship';
 
-export function logGrid(grid) {
+export function logGrid(grid, gameboard) {
     const letters = 'ABCDEFGHIJ'.split('');
-    const table = grid.map(row => {
+    const table = grid.map((row, rowIndex) => {
         const rowObj = {};
         row.forEach((cell, cellIndex) => {
-            // for loop for every missed attack array
-                // updates cell to 'miss'
-            // for loop for every hit attack array
-                // updates cell to cell.title + 'hit'
+            let cellValue = cell;
+            let hit = gameboard.successfulAttacks;
+            let miss = gameboard.missedAttacks;
 
-            // if (cell === null) {
-            //     rowObj[letters[cellIndex]] = 'null';
-            // } else if (cell === 'miss') {
-            //     rowObj[letters[cellIndex]] = 'miss';
-            // } else if (cell instanceof Ship) {
-            //     rowObj[letters[cellIndex]] = `${cell.title}`;
-            // } else {
-            //     rowObj[letters[cellIndex]] = 'unknown'; // For any unexpected cases
-            // }
-            rowObj[letters[cellIndex]] = cell
+            // Check for successful attacks and mark cell
+            hit.forEach(([letter, number]) => {
+                const [attackX, attackY] = gameboard.convertCoordinates(
+                    letter,
+                    number
+                );
+                if (attackX == cellIndex && attackY == rowIndex) {
+                    cellValue = cell.title + ' hit';
+                }
+            });
+
+            // Check for missed attacks and mark cell
+            miss.forEach(([letter, number]) => {
+                const [attackX, attackY] = gameboard.convertCoordinates(
+                    letter,
+                    number
+                );
+                if (attackX == cellIndex && attackY == rowIndex) {
+                    cellValue = 'miss';
+                }
+            });
+
+            if (cell instanceof Ship && cellValue != cell.title + ' hit') {
+                cellValue = cell.title;
+            }
+
+            rowObj[letters[cellIndex]] = cellValue;
         });
         return rowObj;
     });
