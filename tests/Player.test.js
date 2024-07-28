@@ -1,4 +1,3 @@
-import { getShipAt } from '../src/modules/classes/Gameboard';
 import { Player } from '../src/modules/classes/Player';
 import { Ship, ShipManager } from '../src/modules/classes/Ship';
 import { logGrid } from '../src/utility/logHelper';
