@@ -46,7 +46,7 @@ describe('Gameboard', () => {
     });
 
     afterAll(() => {
-        return logGrid(gameboard.grid);
+        return logGrid(gameboard.grid, gameboard);
     });
 
     test('should place ships at specific coordinates', () => {
@@ -65,16 +65,8 @@ describe('Gameboard', () => {
         expect(gameboard.missedAttacks).toEqual([['B', 1]]);
     });
 
-    test('should mark a ship as hit ', () => {
-        // y coordinate is first
-        let [x, y] = [1, 1]
-        expect(gameboard.grid[y][x]).toBe('hit');
-    });
-
-    test('should mark board if hit was a miss', () => {
-        // y coordinate is first
-        let [x, y] = [1, 0]
-        expect(gameboard.grid[y][x]).toBe('miss');
+    test('should record successful attacks', () => {
+        expect(gameboard.successfulAttacks).toEqual([['B', 2], ['E', 5], ['E', 6]]);
     });
 
     test('should report if the ship is sunk', () => {
