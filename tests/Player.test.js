@@ -67,4 +67,31 @@ describe('Player', () => {
 
         expect(hit).toBe(false);
     });
+
+    test('should log attack hits and misses', () => {
+        player1.attack(computer, ['D', 2]);
+        player1.attack(computer, ['F', 1]);
+        player1.attack(computer, ['E', 1]);
+        player1.attack(computer, ['J', 1]);
+
+        const successfulHit = player1.hits;
+        const missedHit = player1.misses;
+
+        expect(successfulHit).toBe(2);
+        expect(missedHit).toBe(4);
+    });
+
+    test('should log attack history', () => {
+        const attackHistory = player1.attackHistory;
+        console.log(attackHistory);
+
+        expect(attackHistory).toEqual([
+            { coordinates: ['B', 2], result: true },
+            { coordinates: ['C', 1], result: false },
+            { coordinates: ['D', 2], result: true },
+            { coordinates: ['F', 1], result: false },
+            { coordinates: ['E', 1], result: false },
+            { coordinates: ['J', 1], result: false },
+        ]);
+    });
 });
