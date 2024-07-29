@@ -14,10 +14,13 @@ export class Player {
      * @param {boolean} isComputer - Indicates if player is a computer.
      */
     constructor(id, name, isComputer) {
-        (this.id = id),
-            (this.name = name),
-            (this.isComputer = isComputer),
-            (this.gameboard = new Gameboard(id));
+        this.id = id;
+        this.name = name;
+        this.isComputer = isComputer;
+        this.gameboard = new Gameboard(id);
+        this.attackHistory = [];
+        this.hits = 0;
+        this.misses = 0;
     }
 
     /**
@@ -28,9 +31,17 @@ export class Player {
      * @returns {boolean} - Returns true if attack was a successful, otherwise false.
      */
     attack(opponent, coordinates = []) {
-        const attack = opponent.gameboard.receiveAttack(coordinates);
+        const result = opponent.gameboard.receiveAttack(coordinates);
 
-        return attack;
+        this.attackHistory.push({coordinates, result});
+
+        if (result) {
+            this.hits += 1;
+        } else {
+            this.misses += 1;
+        }
+
+        return result;
     }
 
     /**
