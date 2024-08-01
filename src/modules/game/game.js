@@ -3,7 +3,24 @@ import { Player } from '../classes/Player';
 import { Ship, ShipManager } from '../classes/Ship';
 
 // TODO: refactor as a class
-// export class Game {}
+// export class Game {
+    // constructor(){
+        // this.playerOne = null;
+        // this.playerTwo = null;
+        // this.currentTurn = null;
+        // this.shipManager = new ShipManager();
+        // Ship.defaultShipManager = this.shipManager;
+
+// }
+    // initializeGame(){
+        // this.playerOne = new Player(1, 'Human', false);
+        // this.playerTwo = new Player(2, 'Computer', true);
+        // this.initShips();
+        // this.placeShips();
+        // this.currentTurn = this.playerOne
+// }
+
+// }
 
 // Init Players
 let playerOne;
