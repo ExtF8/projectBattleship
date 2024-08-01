@@ -3,6 +3,7 @@ import { Ship } from '../src/modules/classes/Ship';
 import { initializeGame } from '../src/modules/game/game';
 
 // TODO: write tests for game class
+// this is a test
 describe('Game logic', () => {
     let game;
     
