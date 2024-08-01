@@ -2,6 +2,9 @@ import { logGrid } from '../../utility/logHelper';
 import { Player } from '../classes/Player';
 import { Ship, ShipManager } from '../classes/Ship';
 
+// TODO: refactor as a class
+// export class Game {}
+
 // Init Players
 let playerOne;
 let playerTwo;
