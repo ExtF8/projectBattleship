@@ -83,7 +83,6 @@ describe('Player', () => {
 
     test('should log attack history', () => {
         const attackHistory = player1.attackHistory;
-        console.log(attackHistory);
 
         expect(attackHistory).toEqual([
             { coordinates: ['B', 2], result: true },
