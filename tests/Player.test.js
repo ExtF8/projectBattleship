@@ -51,11 +51,11 @@ describe('Player', () => {
     
     test('should return false if same coordinates are attacked twice using the attack method', () => {
         // First attack should be valid
-        let attackResult = player1.attack(computer, ['B', 2]);
+        let attackResult = player1.attack(computer, ['C', 2]);
         expect(attackResult).toBe(true);
 
         // Second attack should be false
-        attackResult = player1.attack(computer, ['B', 2]);
+        attackResult = player1.attack(computer, ['C', 2]);
         expect(attackResult).toBe(false);
     });
 
