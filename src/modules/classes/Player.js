@@ -31,7 +31,9 @@ export class Player {
      * @returns {boolean} - Returns true if attack was a successful, otherwise false.
      */
     attack(opponent, coordinates = []) {
-        this.validateAttackCoordinates(coordinates);
+        if(!this.validateAttackCoordinates(coordinates)){
+            return false
+        }
 
         const result = opponent.gameboard.receiveAttack(coordinates);
 
