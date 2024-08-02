@@ -45,7 +45,7 @@ export class Player {
             this.misses += 1;
         }
 
-        return result;
+        return true;
     }
 
     // Validate if the attack has already been made on coordinates
