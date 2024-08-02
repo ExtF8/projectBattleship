@@ -31,9 +31,11 @@ export class Player {
      * @returns {boolean} - Returns true if attack was a successful, otherwise false.
      */
     attack(opponent, coordinates = []) {
+        this.validateAttackCoordinates(coordinates);
+
         const result = opponent.gameboard.receiveAttack(coordinates);
 
-        this.attackHistory.push({coordinates, result});
+        this.attackHistory.push({ coordinates, result });
 
         if (result) {
             this.hits += 1;
@@ -42,6 +44,32 @@ export class Player {
         }
 
         return result;
+    }
+
+    // Validate if the attack has already been made on coordinates
+    validateAttackCoordinates(coordinates) {
+        // Check if attack has already been made
+        let attackExists = this.attackHistory.some(item => {
+            console.log('Checking coordinates: ', item.coordinates);
+            return this.arraysEqual(coordinates, item.coordinates);
+        });
+
+        // Return false if the attack has already been made, true otherwise
+        return !attackExists;
+    }
+
+    // Helper function to compare two arrays
+    arraysEqual(arr1, arr2) {
+        if (arr1.length !== arr2.length) {
+            return false;
+        }
+
+        for (let i = 0; i < arr1.length; i++) {
+            if (arr1[i] !== arr2[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
