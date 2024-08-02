@@ -1,27 +1,40 @@
-import { Player } from '../src/modules/classes/Player';
 import { Ship } from '../src/modules/classes/Ship';
-import { initializeGame } from '../src/modules/game/game';
+import { Game } from '../src/modules/game/game';
+import { logGrid } from '../src/utility/logHelper';
 
 // TODO: write tests for game class
 // this is a test
 describe('Game logic', () => {
     let game;
-    
+
     beforeAll(() => {
         game = new Game();
     });
 
+    afterAll(() => {
+        logGrid(game.playerOne.gameboard.grid, game.playerOne.gameboard);
+        logGrid(game.playerTwo.gameboard.grid, game.playerTwo.gameboard);
+    })
+
     test('should initialize players and place ships correctly', () => {
-        game = initializeGame();
+        game.initializeGame();
 
         expect(game.playerOne).toBeDefined();
         expect(game.playerTwo).toBeDefined();
-        
-        expect(playerOne.gameboard.getShipAt('A', 1)).toBeInstanceOf(Ship);
-        expect(playerTwo.gameboard.getShipAt('J', 1)).toBeInstanceOf(Ship);
+
+        expect(game.playerOne.gameboard.getShipAt('A', 1)).toBeInstanceOf(Ship);
+        expect(game.playerTwo.gameboard.getShipAt('J', 1)).toBeInstanceOf(Ship);
     });
+
     test('should handle attacks and update game state', () => {
         let attackResult = game.playerOne.attack(game.playerTwo, ['J', 1]);
+
         expect(attackResult).toBe(true);
+        expect(game.playerTwo.gameboard.getShipAt('J', 1).isSunk()).toBe(false)
+        // Same spot should not be attackable
+        attackResult = game.playerOne.attack(game.playerTwo, ['J', 1]);
+        console.log(game.playerOne.attackHistory)
+        expect(attackResult).toBe(false)
+
     });
 });
