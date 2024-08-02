@@ -59,9 +59,11 @@ describe('Player', () => {
     test.only('should return false if computer places attack on existing coordinates', () => {
         let attackCoordinates = computer.computerAttack(player1)
         let result = player1.gameboard.receiveAttack(attackCoordinates)
+        console.log('first: ',attackCoordinates, result)
         expect(result).toBe(true)
         // second attack 
         result = player1.gameboard.receiveAttack(attackCoordinates)
+        console.log('second: ',attackCoordinates, result)
         expect(result).toBe(false)
     });
     
