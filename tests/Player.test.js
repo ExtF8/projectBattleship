@@ -48,24 +48,22 @@ describe('Player', () => {
 
         expect(hit).toBe(false);
     });
+    
+    test('should return false if same coordinates are attacked twice using the attack method', () => {
+        // First attack should be valid
+        let attackResult = player1.attack(computer, ['B', 2]);
+        expect(attackResult).toBe(true);
+
+        // Second attack should be false
+        attackResult = player1.attack(computer, ['B', 2]);
+        expect(attackResult).toBe(false);
+    });
 
     test('computer player should attack on random coordinates', () => {
         const attackCoordinates = computer.computerAttack(player1);
 
         expect(Array.isArray(attackCoordinates)).toBe(true);
         expect(attackCoordinates.length).toBe(2);
-    });
-
-    test.only('should return false if computer places attack on existing coordinates', () => {
-        // First attack should return valid coordinates and make a valid attack
-        let attackCoordinates = computer.computerAttack(player1);
-        console.log('first attack coordinates: ', attackCoordinates);
-        expect(attackCoordinates).toBeTruthy(); // Ensure coordinates are returned
-
-        // Second attack on the same coordinates should return false
-        let secondAttackResult = computer.attack(player1, attackCoordinates);
-        console.log('second attack result: ', secondAttackResult);
-        expect(secondAttackResult).toBe(false);
     });
     
     test(`should record hit form computer`, () => {
