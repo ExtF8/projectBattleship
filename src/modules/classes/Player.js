@@ -88,6 +88,7 @@ export class Player {
         do {
             coordinates = this.getRandomCoordinates();
             validAttack = this.attack(opponent, coordinates);
+            console.log(validAttack)
         } while (!validAttack);
 
         return coordinates;
