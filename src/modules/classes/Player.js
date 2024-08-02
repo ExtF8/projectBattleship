@@ -82,13 +82,13 @@ export class Player {
      */
     computerAttack(opponent) {
         let coordinates;
-        let successfulAttack;
+        let validAttack = false;
 
         // Keep trying random coordinates until a valid attack is made.
         do {
             coordinates = this.getRandomCoordinates();
-            successfulAttack = this.attack(opponent, coordinates);
-        } while (successfulAttack === false);
+            validAttack = this.attack(opponent, coordinates);
+        } while (!validAttack);
 
         return coordinates;
     }
