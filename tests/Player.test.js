@@ -56,6 +56,15 @@ describe('Player', () => {
         expect(attackCoordinates.length).toBe(2);
     });
 
+    test.only('should return false if computer places attack on existing coordinates', () => {
+        let attackCoordinates = computer.computerAttack(player1)
+        let result = player1.gameboard.receiveAttack(attackCoordinates)
+        expect(result).toBe(true)
+        // second attack 
+        result = player1.gameboard.receiveAttack(attackCoordinates)
+        expect(result).toBe(false)
+    });
+    
     test(`should record hit form computer`, () => {
         const hit = computer.attack(player1, ['C', 1]);
 
