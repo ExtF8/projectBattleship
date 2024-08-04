@@ -45,72 +45,20 @@ export class Game {
     // Place ships
     placeShips() {
         // Player One Ships
-        this.playerOne.gameboard.placeShip(
-            this.playerOneShips.CARRIER,
-            'A',
-            1,
-            'vertical'
-        );
-        this.playerOne.gameboard.placeShip(
-            this.playerOneShips.BATTLESHIP,
-            'B',
-            2,
-            'vertical'
-        );
-        this.playerOne.gameboard.placeShip(
-            this.playerOneShips.DESTROYER,
-            'C',
-            3,
-            'vertical'
-        );
-        this.playerOne.gameboard.placeShip(
-            this.playerOneShips.SUBMARINE,
-            'D',
-            4,
-            'vertical'
-        );
-        this.playerOne.gameboard.placeShip(
-            this.playerOneShips.PATROL_BOAT,
-            'E',
-            5,
-            'vertical'
-        );
+        this.playerOne.gameboard.placeShip(this.playerOneShips.CARRIER, 'A', 1, 'vertical');
+        this.playerOne.gameboard.placeShip(this.playerOneShips.BATTLESHIP, 'B', 2, 'vertical');
+        this.playerOne.gameboard.placeShip(this.playerOneShips.DESTROYER, 'C', 3, 'vertical');
+        this.playerOne.gameboard.placeShip(this.playerOneShips.SUBMARINE, 'D', 4, 'vertical');
+        this.playerOne.gameboard.placeShip(this.playerOneShips.PATROL_BOAT, 'E', 5, 'vertical');
 
         // Player Two Ships
-        this.playerTwo.gameboard.placeShip(
-            this.playerTwoShips.CARRIER,
-            'J',
-            1,
-            'vertical'
-        );
-        this.playerTwo.gameboard.placeShip(
-            this.playerTwoShips.BATTLESHIP,
-            'I',
-            2,
-            'vertical'
-        );
-        this.playerTwo.gameboard.placeShip(
-            this.playerTwoShips.DESTROYER,
-            'H',
-            3,
-            'vertical'
-        );
-        this.playerTwo.gameboard.placeShip(
-            this.playerTwoShips.SUBMARINE,
-            'G',
-            4,
-            'vertical'
-        );
-        this.playerTwo.gameboard.placeShip(
-            this.playerTwoShips.PATROL_BOAT,
-            'F',
-            5,
-            'vertical'
-        );
-
+        this.playerTwo.gameboard.placeShip(this.playerTwoShips.CARRIER, 'J', 1, 'vertical');
+        this.playerTwo.gameboard.placeShip(this.playerTwoShips.BATTLESHIP, 'I', 2, 'vertical');
+        this.playerTwo.gameboard.placeShip(this.playerTwoShips.DESTROYER, 'H', 3, 'vertical');
+        this.playerTwo.gameboard.placeShip(this.playerTwoShips.SUBMARINE, 'G', 4, 'vertical');
+        this.playerTwo.gameboard.placeShip(this.playerTwoShips.PATROL_BOAT, 'F', 5, 'vertical');
     }
 }
-
 
 // Place attacks
 // log results

@@ -66,7 +66,11 @@ describe('Gameboard', () => {
     });
 
     test('should record successful attacks', () => {
-        expect(gameboard.successfulAttacks).toEqual([['B', 2], ['E', 5], ['E', 6]]);
+        expect(gameboard.successfulAttacks).toEqual([
+            ['B', 2],
+            ['E', 5],
+            ['E', 6],
+        ]);
     });
 
     test('should report if the ship is sunk', () => {
@@ -104,19 +108,19 @@ describe('Gameboard', () => {
         const outOfBoundsShipVertical = Ship.create(Ship.Types.CARRIER);
         const outOfBoundsShipHorizontal = Ship.create(Ship.Types.BATTLESHIP);
 
-        expect(() =>
-            gameboard.placeShip(outOfBoundsShipVertical, 'J', 10, 'vertical')
-        ).toThrow('Invalid placement');
-        expect(() =>
-            gameboard.placeShip(outOfBoundsShipHorizontal, 'J', 1, 'horizontal')
-        ).toThrow('Invalid placement');
+        expect(() => gameboard.placeShip(outOfBoundsShipVertical, 'J', 10, 'vertical')).toThrow(
+            'Invalid placement'
+        );
+        expect(() => gameboard.placeShip(outOfBoundsShipHorizontal, 'J', 1, 'horizontal')).toThrow(
+            'Invalid placement'
+        );
     });
 
     test('should not allow shipt to be placed overlapping another ship', () => {
         const overlappingShip = Ship.create(Ship.Types.SUBMARINE);
 
-        expect(() =>
-            gameboard.placeShip(overlappingShip, 'C', 3, 'horizontal')
-        ).toThrow('Invalid placement');
+        expect(() => gameboard.placeShip(overlappingShip, 'C', 3, 'horizontal')).toThrow(
+            'Invalid placement'
+        );
     });
 });

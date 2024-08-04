@@ -7,18 +7,17 @@ import { logGrid } from '../src/utility/logHelper';
 describe('Game logic', () => {
     let game;
 
-    beforeAll(() => {
+    beforeEach(() => {
         game = new Game();
+        game.initializeGame();
     });
 
     afterAll(() => {
         logGrid(game.playerOne.gameboard.grid, game.playerOne.gameboard);
         logGrid(game.playerTwo.gameboard.grid, game.playerTwo.gameboard);
-    })
+    });
 
     test('should initialize players and place ships correctly', () => {
-        game.initializeGame();
-
         expect(game.playerOne).toBeDefined();
         expect(game.playerTwo).toBeDefined();
 
@@ -30,11 +29,10 @@ describe('Game logic', () => {
         let attackResult = game.playerOne.attack(game.playerTwo, ['J', 1]);
 
         expect(attackResult).toBe(true);
-        expect(game.playerTwo.gameboard.getShipAt('J', 1).isSunk()).toBe(false)
+        expect(game.playerTwo.gameboard.getShipAt('J', 1).isSunk()).toBe(false);
         // Same spot should not be attackable
         attackResult = game.playerOne.attack(game.playerTwo, ['J', 1]);
-        console.log(game.playerOne.attackHistory)
-        expect(attackResult).toBe(false)
-
+        console.log(game.playerOne.attackHistory);
+        expect(attackResult).toBe(false);
     });
 });

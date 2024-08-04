@@ -11,10 +11,7 @@ export function logGrid(grid, gameboard) {
 
             // Check for successful attacks and mark cell
             hit.forEach(([letter, number]) => {
-                const [attackX, attackY] = gameboard.convertCoordinates(
-                    letter,
-                    number
-                );
+                const [attackX, attackY] = gameboard.convertCoordinates(letter, number);
                 if (attackX == cellIndex && attackY == rowIndex) {
                     cellValue = cell.title + ' hit';
                 }
@@ -22,10 +19,7 @@ export function logGrid(grid, gameboard) {
 
             // Check for missed attacks and mark cell
             miss.forEach(([letter, number]) => {
-                const [attackX, attackY] = gameboard.convertCoordinates(
-                    letter,
-                    number
-                );
+                const [attackX, attackY] = gameboard.convertCoordinates(letter, number);
                 if (attackX == cellIndex && attackY == rowIndex) {
                     cellValue = 'miss';
                 }
