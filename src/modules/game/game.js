@@ -8,6 +8,7 @@ export class Game {
         this.playerOne = null;
         this.playerTwo = null;
         this.currentTurn = null;
+        this.isGameOver = false;
         this.shipManager = new ShipManager();
         Ship.defaultShipManager = this.shipManager;
     }
@@ -16,11 +17,7 @@ export class Game {
         this.playerOne = new Player(1, 'Human', false);
         this.playerTwo = new Player(2, 'Computer', true);
         this.initShips();
-        // this.placeShips();
         this.currentTurn = this.playerOne;
-
-        // logGrid(this.playerOne.gameboard.grid, this.playerOne.gameboard);
-        // logGrid(this.playerTwo.gameboard.grid, this.playerTwo.gameboard);
     }
 
     // Init ships
@@ -64,7 +61,6 @@ export class Game {
     // Place attacks
     // log results
     takeTurn(coordinates) {
-        console.log(coordinates);
         // Check if game is over
         if (this.gameIsOver()) {
             throw new Error('Game is over');
@@ -72,9 +68,9 @@ export class Game {
 
         // Define attacking and defending player
         const attackingPlayer = this.currentTurn;
-        const defendingPlayer = this.getOpponent(attackingPlayer);
+        const defendingPlayer = this.getOpponent();
 
-        // Make attack
+        // Place an attack
         const attackResult = attackingPlayer.attack(defendingPlayer, coordinates);
 
         // Check for win
@@ -91,12 +87,15 @@ export class Game {
 
     // Check if game is over
     gameIsOver() {
-        return this.playerOne.gameboard.allShipsSunk() || this.playerTwo.gameboard.allShipsSunk();
+        if (this.playerOne.gameboard.allShipsSunk() || this.playerTwo.gameboard.allShipsSunk()) {
+            this.isGameOver = true;
+        }
+        return this.isGameOver;
     }
 
     // Get opponent player
-    getOpponent(player) {
-        return player === this.playerOne ? this.playerTwo : this.playerOne;
+    getOpponent() {
+        return this.currentTurn === this.playerOne ? this.playerTwo : this.playerOne;
     }
 
     // Check if a player has won the game
@@ -108,8 +107,9 @@ export class Game {
 
     // Determine winner
     declareWinner(defendingPlayer) {
-        const winner = defendingPlayer === this.playerOne ? 'Player One' : 'Player Two';
+        const winner = defendingPlayer === this.playerOne ? 'Player Two' : 'Player One';
         console.log(`${winner} wins!`);
+        return winner
     }
 
     // Switch turn after successful attack
