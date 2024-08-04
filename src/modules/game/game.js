@@ -28,7 +28,7 @@ export class Game {
         this.playerOneShips = this.createShips();
         this.playerTwoShips = this.createShips();
     }
-    
+
     // Create ships
     createShips() {
         return {
@@ -42,12 +42,12 @@ export class Game {
 
     //  Place ships
     placeShipsForPlayer(player, shipType, startCoordinates, direction) {
-        const ship = this.getShipTypesFor(player, shipType)
+        const ship = this.getShipTypesFor(player, shipType);
 
         if (ship) {
-            player.gameboard.placeShip(ship, startCoordinates, direction)
+            player.gameboard.placeShip(ship, startCoordinates, direction);
         } else {
-            throw new Error('Ship type not found')
+            throw new Error('Ship type not found');
         }
     }
 
@@ -58,12 +58,62 @@ export class Game {
             return this.playerTwoShips[shipType];
         }
 
-        return null
+        return null;
     }
 
+    // Place attacks
+    // log results
+    takeTurn(coordinates) {
+        console.log(coordinates);
+        // Check if game is over
+        if (this.gameIsOver()) {
+            throw new Error('Game is over');
+        }
+
+        // Define attacking and defending player
+        const attackingPlayer = this.currentTurn;
+        const defendingPlayer = this.getOpponent(attackingPlayer);
+
+        // Make attack
+        const attackResult = attackingPlayer.attack(defendingPlayer, coordinates);
+
+        // Check for win
+        if (attackResult) {
+            this.checkForWin(defendingPlayer);
+        }
+
+        // Switch turn
+        this.switchTurn();
+
+        // Return attackResult
+        return attackResult;
+    }
+
+    // Check if game is over
+    gameIsOver() {
+        return this.playerOne.gameboard.allShipsSunk() || this.playerTwo.gameboard.allShipsSunk();
+    }
+
+    // Get opponent player
+    getOpponent(player) {
+        return player === this.playerOne ? this.playerTwo : this.playerOne;
+    }
+
+    // Check if a player has won the game
+    checkForWin(defendingPlayer) {
+        if (defendingPlayer.gameboard.allShipsSunk()) {
+            this.declareWinner(defendingPlayer);
+        }
+    }
+
+    // Determine winner
+    declareWinner(defendingPlayer) {
+        const winner = defendingPlayer === this.playerOne ? 'Player One' : 'Player Two';
+        console.log(`${winner} wins!`);
+    }
+
+    // Switch turn after successful attack
+    switchTurn() {
+        this.currentTurn = this.currentTurn === this.playerOne ? this.playerTwo : this.playerOne;
+    }
 }
-
-// Place attacks
-// log results
-
-// Determine winner
