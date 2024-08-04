@@ -21,18 +21,18 @@ describe('Game logic', () => {
         expect(game.playerOne).toBeDefined();
         expect(game.playerTwo).toBeDefined();
 
-        expect(game.playerOne.gameboard.getShipAt('A', 1)).toBeInstanceOf(Ship);
-        expect(game.playerTwo.gameboard.getShipAt('J', 1)).toBeInstanceOf(Ship);
+        expect(game.playerOne.gameboard.getShipAt(['A', 1])).toBeInstanceOf(Ship);
+        expect(game.playerTwo.gameboard.getShipAt(['J', 1])).toBeInstanceOf(Ship);
     });
 
     test('should handle attacks and update game state', () => {
         let attackResult = game.playerOne.attack(game.playerTwo, ['J', 1]);
 
         expect(attackResult).toBe(true);
-        expect(game.playerTwo.gameboard.getShipAt('J', 1).isSunk()).toBe(false);
+        expect(game.playerTwo.gameboard.getShipAt(['J', 1]).isSunk()).toBe(false);
         // Same spot should not be attackable
         attackResult = game.playerOne.attack(game.playerTwo, ['J', 1]);
-        console.log(game.playerOne.attackHistory);
+        // console.log(game.playerOne.attackHistory);
         expect(attackResult).toBe(false);
     });
 });
