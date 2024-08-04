@@ -16,7 +16,7 @@ export class Game {
         this.playerOne = new Player(1, 'Human', false);
         this.playerTwo = new Player(2, 'Computer', true);
         this.initShips();
-        this.placeShips();
+        // this.placeShips();
         this.currentTurn = this.playerOne;
 
         // logGrid(this.playerOne.gameboard.grid, this.playerOne.gameboard);
@@ -25,15 +25,13 @@ export class Game {
 
     // Init ships
     initShips() {
-        this.playerOneShips = {
-            CARRIER: Ship.create(Ship.Types.CARRIER),
-            BATTLESHIP: Ship.create(Ship.Types.BATTLESHIP),
-            DESTROYER: Ship.create(Ship.Types.DESTROYER),
-            SUBMARINE: Ship.create(Ship.Types.SUBMARINE),
-            PATROL_BOAT: Ship.create(Ship.Types.PATROL_BOAT),
-        };
-
-        this.playerTwoShips = {
+        this.playerOneShips = this.createShips();
+        this.playerTwoShips = this.createShips();
+    }
+    
+    // Create ships
+    createShips() {
+        return {
             CARRIER: Ship.create(Ship.Types.CARRIER),
             BATTLESHIP: Ship.create(Ship.Types.BATTLESHIP),
             DESTROYER: Ship.create(Ship.Types.DESTROYER),
@@ -42,22 +40,27 @@ export class Game {
         };
     }
 
-    // Place ships
-    placeShips() {
-        // Player One Ships
-        this.playerOne.gameboard.placeShip(this.playerOneShips.CARRIER, ['A', 1], 'vertical');
-        this.playerOne.gameboard.placeShip(this.playerOneShips.BATTLESHIP, ['B', 2], 'vertical');
-        this.playerOne.gameboard.placeShip(this.playerOneShips.DESTROYER, ['C', 3], 'vertical');
-        this.playerOne.gameboard.placeShip(this.playerOneShips.SUBMARINE, ['D', 4], 'vertical');
-        this.playerOne.gameboard.placeShip(this.playerOneShips.PATROL_BOAT, ['E', 5], 'vertical');
+    //  Place ships
+    placeShipsForPlayer(player, shipType, startCoordinates, direction) {
+        const ship = this.getShipTypesFor(player, shipType)
 
-        // Player Two Ships
-        this.playerTwo.gameboard.placeShip(this.playerTwoShips.CARRIER, ['J', 1], 'vertical');
-        this.playerTwo.gameboard.placeShip(this.playerTwoShips.BATTLESHIP, ['I', 2], 'vertical');
-        this.playerTwo.gameboard.placeShip(this.playerTwoShips.DESTROYER, ['H', 3], 'vertical');
-        this.playerTwo.gameboard.placeShip(this.playerTwoShips.SUBMARINE, ['G', 4], 'vertical');
-        this.playerTwo.gameboard.placeShip(this.playerTwoShips.PATROL_BOAT, ['F', 5], 'vertical');
+        if (ship) {
+            player.gameboard.placeShip(ship, startCoordinates, direction)
+        } else {
+            throw new Error('Ship type not found')
+        }
     }
+
+    getShipTypesFor(player, shipType) {
+        if (player === this.playerOne) {
+            return this.playerOneShips[shipType];
+        } else if (player === this.playerTwo) {
+            return this.playerTwoShips[shipType];
+        }
+
+        return null
+    }
+
 }
 
 // Place attacks
