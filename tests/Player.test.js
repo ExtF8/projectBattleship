@@ -9,7 +9,7 @@ describe('Player', () => {
     let carrier;
     let battleship;
 
-    beforeAll(() => {
+    beforeEach(() => {
         shipManager = new ShipManager();
         Ship.defaultShipManager = shipManager;
 
@@ -38,17 +38,19 @@ describe('Player', () => {
     });
 
     test(`should allow attack on oponent's gameboard`, () => {
-        const hit = player1.attack(computer, ['B', 2]);
+        const attackResult = player1.attack(computer, ['B', 2]);
 
-        expect(hit).toBe(true);
+        expect(attackResult).toBe(true);
     });
 
     test('should record a miss', () => {
-        const hit = player1.attack(computer, ['C', 1]);
+        const initialMisses = player1.misses;
+        const attackResult = player1.attack(computer, ['C', 1]);
 
-        expect(hit).toBe(false);
+        expect(attackResult).toBe(true);
+        expect(player1.misses).toBe(initialMisses + 1);
     });
-    
+
     test('should return false if same coordinates are attacked twice using the attack method', () => {
         // First attack should be valid
         let attackResult = player1.attack(computer, ['C', 2]);
@@ -65,17 +67,19 @@ describe('Player', () => {
         expect(Array.isArray(attackCoordinates)).toBe(true);
         expect(attackCoordinates.length).toBe(2);
     });
-    
-    test(`should record hit form computer`, () => {
-        const hit = computer.attack(player1, ['C', 1]);
 
-        expect(hit).toBe(true);
+    test(`should record hit form computer`, () => {
+        const attackResult = computer.attack(player1, ['C', 1]);
+
+        expect(attackResult).toBe(true);
     });
 
     test('should record a miss from computer', () => {
-        const hit = computer.attack(player1, ['B', 2]);
+        const initialMisses = computer.misses;
+        const attackResult = computer.attack(player1, ['B', 2]);
 
-        expect(hit).toBe(false);
+        expect(attackResult).toBe(true);
+        expect(computer.misses).toBe(initialMisses + 1);
     });
 
     test('should log attack hits and misses', () => {
@@ -87,16 +91,19 @@ describe('Player', () => {
         const successfulHit = player1.hits;
         const missedHit = player1.misses;
 
-        expect(successfulHit).toBe(2);
-        expect(missedHit).toBe(4);
+        expect(successfulHit).toBe(1);
+        expect(missedHit).toBe(3);
     });
 
     test('should log attack history', () => {
+        player1.attack(computer, ['D', 2]);
+        player1.attack(computer, ['F', 1]);
+        player1.attack(computer, ['E', 1]);
+        player1.attack(computer, ['J', 1]);
+
         const attackHistory = player1.attackHistory;
 
         expect(attackHistory).toEqual([
-            { coordinates: ['B', 2], result: true },
-            { coordinates: ['C', 1], result: false },
             { coordinates: ['D', 2], result: true },
             { coordinates: ['F', 1], result: false },
             { coordinates: ['E', 1], result: false },
