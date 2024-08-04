@@ -9,8 +9,8 @@ export class Gameboard {
     /**
      * Creates an instance of Gameboard.
      *
-     * @param {*} id - The id of the Gameboard.
-     * @param {*} size [size=10] - The size of the board (default is 10).
+     * @param {number} id - The id of the Gameboard.
+     * @param {number} size [size=10] - The size of the board (default is 10).
      */
     constructor(id, size = 10) {
         this.id = id;
