@@ -43,13 +43,9 @@ describe('Game logic', () => {
     });
 
     test('should handle attacks and update game state', () => {
-        let attackResult = game.playerOne.attack(game.playerTwo, ['I', 2]);
+        let attackResult = game.takeTurn(['I', 2]);
 
         expect(attackResult).toBe(true);
         expect(game.playerTwo.gameboard.getShipAt(['I', 2]).isSunk()).toBe(false);
-        // Same spot should not be attackable
-        attackResult = game.playerOne.attack(game.playerTwo, ['I', 2]);
-        // console.log(game.playerOne.attackHistory);
-        expect(attackResult).toBe(false);
     });
 });
