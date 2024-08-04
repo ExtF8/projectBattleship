@@ -19,8 +19,8 @@ describe('Player', () => {
         carrier = Ship.create(Ship.Types.CARRIER);
         battleship = Ship.create(Ship.Types.BATTLESHIP);
 
-        player1.gameboard.placeShip(carrier, 'A', 1, 'horizontal');
-        computer.gameboard.placeShip(battleship, 'B', 2, 'horizontal');
+        player1.gameboard.placeShip(carrier, ['A', 1], 'horizontal');
+        computer.gameboard.placeShip(battleship, ['B', 2], 'horizontal');
     });
 
     afterAll(() => {
@@ -33,8 +33,8 @@ describe('Player', () => {
     });
 
     test('should place ships correctly on gameboard', () => {
-        expect(player1.gameboard.getShipAt('A', 1)).toBe(carrier);
-        expect(computer.gameboard.getShipAt('B', 2)).toBe(battleship);
+        expect(player1.gameboard.getShipAt(['A', 1])).toBe(carrier);
+        expect(computer.gameboard.getShipAt(['B', 2])).toBe(battleship);
     });
 
     test(`should allow attack on oponent's gameboard`, () => {
