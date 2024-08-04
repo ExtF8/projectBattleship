@@ -27,8 +27,12 @@ describe('Game logic', () => {
     });
 
     afterAll(() => {
-        logGrid(game.playerOne.gameboard);
-        logGrid(game.playerTwo.gameboard);
+        return (
+            console.log('Player One'),
+            logGrid(game.playerOne.gameboard),
+            console.log('Player Two'),
+            logGrid(game.playerTwo.gameboard)
+        );
     });
 
     test('should initialize players', () => {
@@ -49,5 +53,75 @@ describe('Game logic', () => {
 
         expect(attackResult).toBe(true);
         expect(game.playerTwo.gameboard.getShipAt(['I', 2]).isSunk()).toBe(false);
+    });
+
+    test('should switch turns after each attacks', () => {
+        // Human attack
+        game.takeTurn(['J', 1]);
+        expect(game.currentTurn).toBe(game.playerTwo);
+
+        // Computer attack
+        game.takeTurn(['A', 1]);
+        expect(game.currentTurn).toBe(game.playerOne);
+    });
+
+    test('should throw an error if attacking after game is over', () => {
+        // Sink all playerTwo ships to end the game
+
+        // First take turn is from Player One
+        game.takeTurn(['J', 1]);
+        // Second take turn is from Computer
+        game.takeTurn(['A', 10]);
+
+        game.takeTurn(['J', 2]);
+        game.takeTurn(['A', 9]);
+
+        game.takeTurn(['J', 3]);
+        game.takeTurn(['A', 8]);
+
+        game.takeTurn(['J', 4]);
+        game.takeTurn(['A', 7]);
+
+        game.takeTurn(['J', 5]);
+        game.takeTurn(['A', 6]);
+
+        game.takeTurn(['I', 2]);
+        game.takeTurn(['A', 10]);
+
+        game.takeTurn(['I', 3]);
+        game.takeTurn(['B', 9]);
+
+        game.takeTurn(['I', 4]);
+        game.takeTurn(['B', 8]);
+
+        game.takeTurn(['I', 5]);
+        game.takeTurn(['B', 7]);
+
+        game.takeTurn(['H', 3]);
+        game.takeTurn(['C', 8]);
+
+        game.takeTurn(['H', 4]);
+        game.takeTurn(['C', 7]);
+
+        game.takeTurn(['H', 5]);
+        game.takeTurn(['C', 6]);
+
+        game.takeTurn(['G', 4]);
+        game.takeTurn(['D', 8]);
+
+        game.takeTurn(['G', 5]);
+        game.takeTurn(['D', 7]);
+
+        game.takeTurn(['G', 6]);
+        game.takeTurn(['D', 6]);
+
+        game.takeTurn(['F', 5]);
+        game.takeTurn(['D', 7]);
+
+        game.takeTurn(['F', 6]); // This should sink the last ship of playerTwo
+
+        expect(() => game.takeTurn(['A', 1])).toThrow('Game is over');
+        const result = game.declareWinner();
+        expect(result).toBe('Player One');
     });
 });
