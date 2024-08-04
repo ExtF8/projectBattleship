@@ -1,8 +1,8 @@
 import { Ship } from '../modules/classes/Ship';
 
-export function logGrid(grid, gameboard) {
+export function logGrid(gameboard) {
     const letters = 'ABCDEFGHIJ'.split('');
-    const table = grid.map((row, rowIndex) => {
+    const table = gameboard.grid.map((row, rowIndex) => {
         const rowObj = {};
         row.forEach((cell, cellIndex) => {
             let cellValue = cell;

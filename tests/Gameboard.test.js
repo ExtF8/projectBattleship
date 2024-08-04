@@ -46,7 +46,7 @@ describe('Gameboard', () => {
     });
 
     afterAll(() => {
-        return logGrid(gameboard.grid, gameboard);
+        return logGrid(gameboard);
     });
 
     test('should place ships at specific coordinates', () => {

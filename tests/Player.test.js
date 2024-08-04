@@ -25,10 +25,10 @@ describe('Player', () => {
 
     afterAll(() => {
         return (
-            console.log('Computer: '),
-            logGrid(computer.gameboard.grid, computer.gameboard),
             console.log('Player 1: '),
-            logGrid(player1.gameboard.grid, player1.gameboard)
+            logGrid(player1.gameboard),
+            console.log('Computer: '),
+            logGrid(computer.gameboard)
         );
     });
 
@@ -68,14 +68,14 @@ describe('Player', () => {
         expect(attackCoordinates.length).toBe(2);
     });
 
-    test(`should record hit form computer`, () => {
+    test('should record hit form computer', () => {
         const attackResult = computer.attack(player1, ['C', 1]);
 
         expect(attackResult).toBe(true);
     });
 
     test('should record a miss from computer', () => {
-        const initialMisses = computer.misses;
+        let initialMisses = computer.misses;
         const attackResult = computer.attack(player1, ['B', 2]);
 
         expect(attackResult).toBe(true);
