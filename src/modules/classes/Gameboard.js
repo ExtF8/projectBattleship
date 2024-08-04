@@ -45,13 +45,13 @@ export class Gameboard {
      * Places the ship on the grid at the specified coordinates and direction.
      *
      * @param {Object} ship - The ship to place.
-     * @param {string} startLetter - The starting letter coordinate (column).
-     * @param {number} startNumber - The starting number coordinate (row).
+     * @param {Array} startCoordinates - The starting coordinates [letter, number].
      * @param {string} direction - The direction to place the ship (horizontal or vertical).
      * @throws {Error} - If placement is invalid.
      */
-    placeShip(ship, startLetter, startNumber, direction) {
-        const [x, y] = this.convertCoordinates(startLetter, startNumber);
+    placeShip(ship, startCoordinates, direction) {
+        // const [startRow, startCol] = startCoordinates;
+        const [x, y] = this.convertCoordinates(startCoordinates);
 
         // Validate the placement
         if (!this.validatePlacement(ship, x, y, direction)) {
@@ -114,12 +114,11 @@ export class Gameboard {
     /**
      * Retrieves the ship at the specified coordinates.
      *
-     * @param {string} letter - The letter coordinate (column).
-     * @param {number} number - The number coordinate (row).
+     * @param {Array} coordinates - The coordinates of the to retrieve ship from [letter, number].
      * @returns {Object||null} - The ship at coordinates, or null if none exists.
      */
-    getShipAt(letter, number) {
-        const [x, y] = this.convertCoordinates(letter, number);
+    getShipAt(coordinates = []) {
+        const [x, y] = this.convertCoordinates(coordinates);
         let shipAt = this.grid[y][x];
         return shipAt;
     }
@@ -131,9 +130,9 @@ export class Gameboard {
      * @returns {boolean} - True if the attack hit a ship, false otherwise.
      */
     receiveAttack(coordinates = []) {
-        const [letter, number] = coordinates;
         let hit = false;
-        let target = this.getShipAt(letter, number);
+        let target = this.getShipAt(coordinates);
+        const [letter, number] = coordinates;
 
         if (target === null) {
             this.missedAttacks.push([letter, number]);
@@ -152,7 +151,7 @@ export class Gameboard {
      * @returns {boolean} - True if all ships are sunk, false otherwise.
      */
     allShipsSunk() {
-        return this.ships.every(ship => ship.isSunk);
+        return this.ships.every(ship => ship.isSunk());
     }
 
     /**
@@ -162,7 +161,8 @@ export class Gameboard {
      * @param {number} number - The number representing the row, e.g., (1-10).
      * @returns {number[]} - An array containing the x and y indices.
      */
-    convertCoordinates(letter, number) {
+    convertCoordinates(coordinates = []) {
+        const [letter, number] = coordinates;
         const x = this.letterToIndex(letter);
         const y = number - 1;
 
