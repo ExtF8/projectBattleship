@@ -28,11 +28,11 @@ export class Player {
      *
      * @param {Player} opponent - The opponent player.
      * @param {Array} coordinates - The coordinates of attack [letter, number].
-     * @returns {boolean} - Returns true if attack was a successful, otherwise false.
+     * @returns {boolean} - Returns true if attack was successful (hit or miss), otherwise false.
      */
     attack(opponent, coordinates = []) {
-        if(!this.validateAttackCoordinates(coordinates)){
-            return false
+        if (!this.isUniqueAttack(coordinates)) {
+            return false;
         }
 
         const result = opponent.gameboard.receiveAttack(coordinates);
@@ -48,30 +48,35 @@ export class Player {
         return true;
     }
 
-    // Validate if the attack has already been made on coordinates
-    validateAttackCoordinates(coordinates) {
+    /**
+     * Validate if the attack has already been made on coordinates.
+     *
+     * @param {Array} coordinates - The coordinates to check.
+     * @returns {Boolean} - Returns true if coordinates are unique, otherwise false.
+     */
+    isUniqueAttack(coordinates) {
         // Check if attack has already been made
         let attackExists = this.attackHistory.some(item => {
-            console.log('Checking coordinates: ', item.coordinates);
             return this.arraysEqual(coordinates, item.coordinates);
         });
 
-        // Return false if the attack has already been made, true otherwise
+        // Return true if no previous attack was found
         return !attackExists;
     }
 
-    // Helper function to compare two arrays
+    /**
+     * Helper function to compare two arrays.
+     *
+     * @param {Array} arr1 - First array, incoming coordinates.
+     * @param {Array} arr2 - Second array, existing coordinates.
+     * @returns {Boolean} - Returns true if arrays are equal, otherwise false.
+     */
     arraysEqual(arr1, arr2) {
         if (arr1.length !== arr2.length) {
             return false;
         }
 
-        for (let i = 0; i < arr1.length; i++) {
-            if (arr1[i] !== arr2[i]) {
-                return false;
-            }
-        }
-        return true;
+        return arr1.every((value, index) => value === arr2[index]);
     }
 
     /**
@@ -88,8 +93,7 @@ export class Player {
         do {
             coordinates = this.getRandomCoordinates();
             validAttack = this.attack(opponent, coordinates);
-            console.log('do', validAttack)
-        } while (validAttack === false);
+        } while (!validAttack);
 
         return coordinates;
     }
