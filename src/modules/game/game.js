@@ -1,4 +1,3 @@
-import { logGrid } from '../../utility/logHelper';
 import { Player } from '../classes/Player';
 import { Ship, ShipManager } from '../classes/Ship';
 
@@ -171,5 +170,16 @@ export class Game {
      */
     switchTurn() {
         this.currentTurn = this.currentTurn === this.playerOne ? this.playerTwo : this.playerOne;
+    }
+
+    /**
+     * Resets game to its initial state.
+     */
+    resetGame() {
+        this.playerOne = null;
+        this.playerTwo = null;
+        this.currentTurn = null;
+        this.isGameOver = false;
+        this.shipManager.clearShips();
     }
 }
