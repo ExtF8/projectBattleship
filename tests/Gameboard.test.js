@@ -59,7 +59,7 @@ describe('Gameboard', () => {
     });
 
     test('should place ships at specific coordinates', () => {
-        expect(gameboard.getShipAt(['A', 1]).id).toBe(ships.carrier.id);
+        expect(gameboard.getShipAt(['A', 1]).id).toBe(carrier.id);
     });
 
     test('should receive attack on specified coordinates', () => {
