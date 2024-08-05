@@ -28,22 +28,22 @@ describe('Gameboard', () => {
         };
 
         // // place
-        // carrier = Ship.create(Ship.Types.CARRIER);
+         carrier = Ship.create(Ship.Types.CARRIER);
         // // receive attack
-        // battleship = Ship.create(Ship.Types.BATTLESHIP);
+        battleship = Ship.create(Ship.Types.BATTLESHIP);
 
-        // destroyer = Ship.create(Ship.Types.DESTROYER);
+        destroyer = Ship.create(Ship.Types.DESTROYER);
 
-        // submarine = Ship.create(Ship.Types.SUBMARINE);
+        submarine = Ship.create(Ship.Types.SUBMARINE);
 
         // // sunk
-        // patrolBoat = Ship.create(Ship.Types.PATROL_BOAT);
+        patrolBoat = Ship.create(Ship.Types.PATROL_BOAT);
 
-        gameboard.placeShip(ships.carrier, ['A', 1], 'vertical');
-        gameboard.placeShip(ships.battleship, ['B', 2], 'vertical');
-        gameboard.placeShip(ships.destroyer, ['C', 3], 'vertical');
-        gameboard.placeShip(ships.submarine, ['D', 4], 'vertical');
-        gameboard.placeShip(ships.patrolBoat, ['E', 5], 'vertical');
+        gameboard.placeShip(carrier, ['A', 1], 'vertical');
+        gameboard.placeShip(battleship, ['B', 2], 'vertical');
+        gameboard.placeShip(destroyer, ['C', 3], 'vertical');
+        gameboard.placeShip(submarine, ['D', 4], 'vertical');
+        gameboard.placeShip(patrolBoat, ['E', 5], 'vertical');
 
         // Attacks
         attackHit = gameboard.receiveAttack(['B', 2]);
