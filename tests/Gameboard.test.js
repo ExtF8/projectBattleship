@@ -12,29 +12,38 @@ describe('Gameboard', () => {
     let patrolBoat;
     let attackHit;
     let attackMiss;
+    let ships;
 
-    beforeAll(() => {
+    beforeEach(() => {
         shipManager = new ShipManager();
         gameboard = new Gameboard(1);
         Ship.defaultShipManager = shipManager;
 
-        // place
-        carrier = Ship.create(Ship.Types.CARRIER);
-        // receive attack
-        battleship = Ship.create(Ship.Types.BATTLESHIP);
+        ships = {
+            CARRIER: Ship.create(Ship.Types.CARRIER),
+            BATTLESHIP: Ship.create(Ship.Types.BATTLESHIP),
+            DESTROYER: Ship.create(Ship.Types.DESTROYER),
+            SUBMARINE: Ship.create(Ship.Types.SUBMARINE),
+            PATROL_BOAT: Ship.create(Ship.Types.PATROL_BOAT),
+        };
 
-        destroyer = Ship.create(Ship.Types.DESTROYER);
+        // // place
+        // carrier = Ship.create(Ship.Types.CARRIER);
+        // // receive attack
+        // battleship = Ship.create(Ship.Types.BATTLESHIP);
 
-        submarine = Ship.create(Ship.Types.SUBMARINE);
+        // destroyer = Ship.create(Ship.Types.DESTROYER);
 
-        // sunk
-        patrolBoat = Ship.create(Ship.Types.PATROL_BOAT);
+        // submarine = Ship.create(Ship.Types.SUBMARINE);
 
-        gameboard.placeShip(carrier, ['A', 1], 'vertical');
-        gameboard.placeShip(battleship, ['B', 2], 'vertical');
-        gameboard.placeShip(destroyer, ['C', 3], 'vertical');
-        gameboard.placeShip(submarine, ['D', 4], 'vertical');
-        gameboard.placeShip(patrolBoat, ['E', 5], 'vertical');
+        // // sunk
+        // patrolBoat = Ship.create(Ship.Types.PATROL_BOAT);
+
+        // gameboard.placeShip(ships[0], ['A', 1], 'vertical');
+        // gameboard.placeShip(ships.battleship, ['B', 2], 'vertical');
+        // gameboard.placeShip(ships.destroyer, ['C', 3], 'vertical');
+        // gameboard.placeShip(ships.submarine, ['D', 4], 'vertical');
+        // gameboard.placeShip(ships.patrolBoat, ['E', 5], 'vertical');
 
         // Attacks
         attackHit = gameboard.receiveAttack(['B', 2]);
@@ -50,7 +59,7 @@ describe('Gameboard', () => {
     });
 
     test('should place ships at specific coordinates', () => {
-        expect(gameboard.getShipAt(['A', 1]).id).toBe(carrier.id);
+        expect(gameboard.getShipAt(['A', 1]).id).toBe(ships.carrier.id);
     });
 
     test('should receive attack on specified coordinates', () => {
@@ -111,9 +120,9 @@ describe('Gameboard', () => {
         expect(() => gameboard.placeShip(outOfBoundsShipVertical, ['J', 10], 'vertical')).toThrow(
             'Invalid placement'
         );
-        expect(() => gameboard.placeShip(outOfBoundsShipHorizontal, ['J', 1], 'horizontal')).toThrow(
-            'Invalid placement'
-        );
+        expect(() =>
+            gameboard.placeShip(outOfBoundsShipHorizontal, ['J', 1], 'horizontal')
+        ).toThrow('Invalid placement');
     });
 
     test('should not allow shipt to be placed overlapping another ship', () => {
@@ -122,5 +131,26 @@ describe('Gameboard', () => {
         expect(() => gameboard.placeShip(overlappingShip, ['C', 3], 'horizontal')).toThrow(
             'Invalid placement'
         );
+    });
+
+    test('should place ships randomly without overlap', () => {
+
+
+        // Place ships randomly
+        gameboard.placeShipsRandomly(ships);
+
+        // Verify that no ship overlaps
+        const allShips = Object.values(ships);
+        allShips.forEach(ship => {
+            const shipCells = gameboard.grid.flatMap((row, rowIndex) => 
+                row.map((cell, colIndex) => cell === ship ? [rowIndex, colIndex] : null)
+            ).filter(cell => cell !== null);
+            
+            // Check all cells occupied by this ship
+            shipCells.forEach(([y, x]) => {
+                // Make sure no other ship is occupying this cell
+                expect(gameboard.grid[y][x]).toBe(ship);
+            });
+        });
     });
 });
