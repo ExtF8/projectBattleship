@@ -14,7 +14,7 @@ describe('Gameboard', () => {
     let attackMiss;
     let ships;
 
-    beforeEach(() => {
+    beforeAll(() => {
         shipManager = new ShipManager();
         gameboard = new Gameboard(1);
         Ship.defaultShipManager = shipManager;
@@ -39,11 +39,11 @@ describe('Gameboard', () => {
         // // sunk
         // patrolBoat = Ship.create(Ship.Types.PATROL_BOAT);
 
-        // gameboard.placeShip(ships[0], ['A', 1], 'vertical');
-        // gameboard.placeShip(ships.battleship, ['B', 2], 'vertical');
-        // gameboard.placeShip(ships.destroyer, ['C', 3], 'vertical');
-        // gameboard.placeShip(ships.submarine, ['D', 4], 'vertical');
-        // gameboard.placeShip(ships.patrolBoat, ['E', 5], 'vertical');
+        gameboard.placeShip(ships.carrier, ['A', 1], 'vertical');
+        gameboard.placeShip(ships.battleship, ['B', 2], 'vertical');
+        gameboard.placeShip(ships.destroyer, ['C', 3], 'vertical');
+        gameboard.placeShip(ships.submarine, ['D', 4], 'vertical');
+        gameboard.placeShip(ships.patrolBoat, ['E', 5], 'vertical');
 
         // Attacks
         attackHit = gameboard.receiveAttack(['B', 2]);
@@ -134,10 +134,10 @@ describe('Gameboard', () => {
     });
 
     test('should place ships randomly without overlap', () => {
-
+        const randomGameboard = new Gameboard(3)
 
         // Place ships randomly
-        gameboard.placeShipsRandomly(ships);
+        randomGameboard.placeShipsRandomly(ships);
 
         // Verify that no ship overlaps
         const allShips = Object.values(ships);
@@ -152,5 +152,6 @@ describe('Gameboard', () => {
                 expect(gameboard.grid[y][x]).toBe(ship);
             });
         });
+        logGrid(randomGameboard)
     });
 });
