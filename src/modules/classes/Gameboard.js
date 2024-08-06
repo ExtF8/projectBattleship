@@ -18,6 +18,7 @@ export class Gameboard {
         this.ships = [];
         this.missedAttacks = [];
         this.successfulAttacks = [];
+        this.isRandomPlacement = false;
     }
 
     /**
@@ -81,10 +82,17 @@ export class Gameboard {
      * @returns {boolean} - True if placement is valid, otherwise false.
      */
     validatePlacement(ship, x, y, direction) {
+        // Check surrounding cells if random placement is called
+        if (this.isRandomPlacement) {
+            if (this.checkSurrounding(x, y)) {
+            return false;
+        }
+        }
+
         if (direction === 'horizontal') {
             // Ensure the ship fits horizontally within bounds
             if (x + ship.length > this.size || y >= this.size) return false;
-            // Check each cell the ship would occupy for overlap
+            // Check each cell the ship would occupy for overlap or proximity
             for (let i = 0; i < ship.length; i++) {
                 if (
                     x + i >= this.size ||
@@ -97,7 +105,7 @@ export class Gameboard {
         } else if (direction === 'vertical') {
             // Ensure the ship fits vertically within bounds
             if (y + ship.length > this.size || x >= this.size) return false;
-            // Check each cell the ship would occupy for overlap
+            // Check each cell the ship would occupy for overlap or proximity
             for (let i = 0; i < ship.length; i++) {
                 if (
                     y + i >= this.size ||
@@ -108,6 +116,29 @@ export class Gameboard {
                 }
             }
         }
+        return true;
+    }
+
+    // Helper function to check surrounding cells
+    checkSurrounding(x, y) {
+        // Ofsets surrounding cells
+        const deltas = [-1, 0, 1];
+        // Loop through x-offsets and y-offsets
+        for (let dx of deltas) {
+            for (let dy of deltas) {
+                // Neighbor x coordinate
+                const nx = x + dx;
+                // Neighbor y coordinate
+                const ny = y + dy;
+
+                // Check if neighbor cell is within bounds and not empty
+                if (nx >= 0 && nx < this.size && ny >= 0 && ny < this.size && this.grid[ny][nx] !== null) {
+                    // Invalid placement due to proximity to another ship
+                    return false;
+                }
+            }
+        }
+        // Valid placement with surrounding cells empty
         return true;
     }
 
@@ -175,6 +206,7 @@ export class Gameboard {
      * @param {Object} ships - The ships to place.
      */
     placeShipsRandomly(ships) {
+        this.isRandomPlacement = true;
         // Get board size
         const size = this.grid.length;
 

@@ -19,24 +19,13 @@ describe('Gameboard', () => {
         gameboard = new Gameboard(1);
         Ship.defaultShipManager = shipManager;
 
-        ships = {
-            CARRIER: Ship.create(Ship.Types.CARRIER),
-            BATTLESHIP: Ship.create(Ship.Types.BATTLESHIP),
-            DESTROYER: Ship.create(Ship.Types.DESTROYER),
-            SUBMARINE: Ship.create(Ship.Types.SUBMARINE),
-            PATROL_BOAT: Ship.create(Ship.Types.PATROL_BOAT),
-        };
-
-        // // place
+        // place
         carrier = Ship.create(Ship.Types.CARRIER);
-        // // receive attack
+        // receive attack
         battleship = Ship.create(Ship.Types.BATTLESHIP);
-
         destroyer = Ship.create(Ship.Types.DESTROYER);
-
         submarine = Ship.create(Ship.Types.SUBMARINE);
-
-        // // sunk
+        // sunk
         patrolBoat = Ship.create(Ship.Types.PATROL_BOAT);
 
         gameboard.placeShip(carrier, ['A', 1], 'vertical');
@@ -52,6 +41,15 @@ describe('Gameboard', () => {
         // PatrolBoat
         gameboard.receiveAttack(['E', 5]);
         gameboard.receiveAttack(['E', 6]);
+
+        // Ships for random placement tests
+        ships = {
+            CARRIER: Ship.create(Ship.Types.CARRIER),
+            BATTLESHIP: Ship.create(Ship.Types.BATTLESHIP),
+            DESTROYER: Ship.create(Ship.Types.DESTROYER),
+            SUBMARINE: Ship.create(Ship.Types.SUBMARINE),
+            PATROL_BOAT: Ship.create(Ship.Types.PATROL_BOAT),
+        };
     });
 
     afterAll(() => {
@@ -146,5 +144,51 @@ describe('Gameboard', () => {
         });
         logGrid(randomGameboard);
     });
-});
 
+    test.only('should not place ships next to each other', () => {
+        const randomGameboard = new Gameboard(3);
+
+        const randomShips = {
+            CARRIER: Ship.create(Ship.Types.CARRIER),
+            BATTLESHIP: Ship.create(Ship.Types.BATTLESHIP),
+            DESTROYER: Ship.create(Ship.Types.DESTROYER),
+            SUBMARINE: Ship.create(Ship.Types.SUBMARINE),
+            PATROL_BOAT: Ship.create(Ship.Types.PATROL_BOAT),
+        };
+
+        // Place ships randomly
+        randomGameboard.placeShipsRandomly(randomShips);
+
+        // Helper function to check that no ships are placed next to each other
+        const checkNoAdjacentShips = grid => {
+            // Offsets for surrounding cells
+            const deltas = [-1, 0, 1];
+
+            for (let y = 0; y < grid.length; y++) {
+                for (let x = 0; x < grid.length; x++) {
+                    // If there is a ship at this cell
+                    if (grid[y][x] !== null) {
+                        // Check surrounding cells
+                        for (let dx of deltas) {
+                            for (let dy of deltas) {
+                                // Skip the cell itself
+                                if (dx === 0 && dy === 0) {
+                                    continue;
+                                }
+                                const nx = x + dx;
+                                const ny = y + dy;
+                                if (nx >= 0 && nx < grid.length && ny >= 0 && ny < grid.length) {
+                                    // Ensure that surrounding cells are empty
+                                    expect(grid[ny][nx]).toBeNull();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        // Verify that no ships are next to each other
+        checkNoAdjacentShips(randomGameboard.grid);
+    });
+});
