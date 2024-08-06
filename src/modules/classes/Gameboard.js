@@ -169,22 +169,27 @@ export class Gameboard {
         return [x, y];
     }
 
+    /**
+     * Places ships randomly on the board.
+     *
+     * @param {Object} ships - The ships to place.
+     */
     placeShipsRandomly(ships) {
         // Get board size
         const size = this.grid.length;
-    
+
         Object.values(ships).forEach(ship => {
             let placed = false;
-    
+
             while (!placed) {
                 // Randomly choose direction (horizontal or vertical)
                 const direction = Math.random() < 0.5 ? 'horizontal' : 'vertical';
-                
+
                 // Randomly choose starting coordinates
                 const startX = Math.floor(Math.random() * size);
                 const startY = Math.floor(Math.random() * size);
                 const startCoordinates = [this.indexToLetter(startX), startY + 1];
-    
+
                 // Validate and place ship
                 try {
                     this.placeShip(ship, startCoordinates, direction);
@@ -197,8 +202,13 @@ export class Gameboard {
         });
     }
 
+    /**
+     * Converts an index to its corresponding letter.
+     *
+     * @param {number} index - An index to convert
+     * @returns {string} - The corresponding letter
+     */
     indexToLetter(index) {
         return String.fromCharCode(index + 'A'.charCodeAt(0));
     }
-
 }
