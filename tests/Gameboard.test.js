@@ -28,7 +28,7 @@ describe('Gameboard', () => {
         };
 
         // // place
-         carrier = Ship.create(Ship.Types.CARRIER);
+        carrier = Ship.create(Ship.Types.CARRIER);
         // // receive attack
         battleship = Ship.create(Ship.Types.BATTLESHIP);
 
@@ -134,24 +134,17 @@ describe('Gameboard', () => {
     });
 
     test('should place ships randomly without overlap', () => {
-        const randomGameboard = new Gameboard(3)
+        const randomGameboard = new Gameboard(3);
 
         // Place ships randomly
         randomGameboard.placeShipsRandomly(ships);
 
-        // Verify that no ship overlaps
-        const allShips = Object.values(ships);
-        allShips.forEach(ship => {
-            const shipCells = gameboard.grid.flatMap((row, rowIndex) => 
-                row.map((cell, colIndex) => cell === ship ? [rowIndex, colIndex] : null)
-            ).filter(cell => cell !== null);
-            
-            // Check all cells occupied by this ship
-            shipCells.forEach(([y, x]) => {
-                // Make sure no other ship is occupying this cell
-                expect(gameboard.grid[y][x]).toBe(ship);
-            });
+        // Ensure that all ships are placed on the board
+        Object.values(ships).forEach(ship => {
+            const isPlaced = randomGameboard.grid.some(row => row.includes(ship));
+            expect(isPlaced).toBe(true);
         });
-        logGrid(randomGameboard)
+        logGrid(randomGameboard);
     });
 });
+
