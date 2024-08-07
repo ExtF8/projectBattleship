@@ -83,11 +83,9 @@ export class Gameboard {
      */
     validatePlacement(ship, x, y, direction) {
         // Check surrounding cells if random placement is called
-        if (this.isRandomPlacement) {
-            if (this.checkSurrounding(x, y)) {
-            return false;
-        }
-        }
+        // if (this.isRandomPlacement && !this.checkSurrounding(x, y)) {
+        //     return false;
+        // }
 
         if (direction === 'horizontal') {
             // Ensure the ship fits horizontally within bounds
@@ -120,26 +118,82 @@ export class Gameboard {
     }
 
     // Helper function to check surrounding cells
-    checkSurrounding(x, y) {
+    checkSurrounding(x, y, length, direction) {
         // Ofsets surrounding cells
         const deltas = [-1, 0, 1];
-        // Loop through x-offsets and y-offsets
-        for (let dx of deltas) {
-            for (let dy of deltas) {
-                // Neighbor x coordinate
-                const nx = x + dx;
-                // Neighbor y coordinate
-                const ny = y + dy;
+        for (let i = 0; i < length; i++) {
+            // Loop through x-offsets and y-offsets
+            for (let dx of deltas) {
+                for (let dy of deltas) {
+                    // if (dx === 0 && dy === 0) continue;
+                    // Neighbor x coordinate
+                    const nx = x + (direction === 'horizontal' ? i : 0) + dx;
+                    // Neighbor y coordinate
+                    const ny = y + (direction === 'vertical' ? i : 0) + dy;
 
-                // Check if neighbor cell is within bounds and not empty
-                if (nx >= 0 && nx < this.size && ny >= 0 && ny < this.size && this.grid[ny][nx] !== null) {
-                    // Invalid placement due to proximity to another ship
-                    return false;
+                    // Check if neighbor cell is within bounds and not empty
+                    if (
+                        nx >= 0 &&
+                        nx < this.size &&
+                        ny >= 0 &&
+                        ny < this.size &&
+                        this.grid[ny][nx] === null
+                    ) {
+                        // Invalid placement due to proximity to another ship
+                        return false;
+                    }
                 }
             }
         }
         // Valid placement with surrounding cells empty
         return true;
+    }
+    /**
+     * Places ships randomly on the board.
+     *
+     * @param {Object} ships - The ships to place.
+     */
+    placeShipsRandomly(ships) {
+        const size = this.grid.length;
+
+        Object.values(ships).forEach(ship => {
+            let placed = false;
+
+            let attempts = 0;
+            const maxAttempts = 100;
+            while (!placed && attempts < maxAttempts) {
+                attempts++;
+                // Randomly choose direction (horizontal or vertical)
+                const direction = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+
+                // Randomly choose starting coordinates
+                const startX = Math.floor(Math.random() * size);
+                const startY = Math.floor(Math.random() * size);
+                const startCoordinates = [this.indexToLetter(startX), startY + 1];
+
+                const [x, y] = this.convertCoordinates(startCoordinates);
+                // console.log(x, y);
+                // Validate and place ship
+                // try {
+                //     this.placeShip(ship, startCoordinates, direction);
+                //     placed = true; // Exit loop if placement is successful
+                // } catch (error) {
+                //     // If placement is invalid, try again with different coordinates
+                //     continue;
+                // }
+
+                if (
+                    this.validatePlacement(ship, x, y, direction) &&
+                    this.checkSurrounding(x, y, ship.length, direction)
+                ) {
+                    this.placeShip(ship, startCoordinates, direction);
+                    placed = true;
+                }
+            }
+            if (!placed) {
+                throw new Error('Failed to place ship after many attempts');
+            }
+        });
     }
 
     /**
@@ -201,46 +255,12 @@ export class Gameboard {
     }
 
     /**
-     * Places ships randomly on the board.
-     *
-     * @param {Object} ships - The ships to place.
-     */
-    placeShipsRandomly(ships) {
-        this.isRandomPlacement = true;
-        // Get board size
-        const size = this.grid.length;
-
-        Object.values(ships).forEach(ship => {
-            let placed = false;
-
-            while (!placed) {
-                // Randomly choose direction (horizontal or vertical)
-                const direction = Math.random() < 0.5 ? 'horizontal' : 'vertical';
-
-                // Randomly choose starting coordinates
-                const startX = Math.floor(Math.random() * size);
-                const startY = Math.floor(Math.random() * size);
-                const startCoordinates = [this.indexToLetter(startX), startY + 1];
-
-                // Validate and place ship
-                try {
-                    this.placeShip(ship, startCoordinates, direction);
-                    placed = true; // Exit loop if placement is successful
-                } catch (error) {
-                    // If placement is invalid, try again with different coordinates
-                    continue;
-                }
-            }
-        });
-    }
-
-    /**
      * Converts an index to its corresponding letter.
      *
      * @param {number} index - An index to convert
      * @returns {string} - The corresponding letter
      */
     indexToLetter(index) {
-        return String.fromCharCode(index + 'A'.charCodeAt(0));
+        return String.fromCharCode('A'.charCodeAt(0) + index);
     }
 }
