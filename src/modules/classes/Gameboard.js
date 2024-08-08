@@ -14,11 +14,11 @@ export class Gameboard {
      */
     constructor(id, size = 10) {
         this.id = id;
+        this.size = size;
         this.grid = this.createEmptyGrid(size);
         this.ships = [];
         this.missedAttacks = [];
         this.successfulAttacks = [];
-        this.isRandomPlacement = false;
     }
 
     /**
@@ -82,11 +82,6 @@ export class Gameboard {
      * @returns {boolean} - True if placement is valid, otherwise false.
      */
     validatePlacement(ship, x, y, direction) {
-        // Check surrounding cells if random placement is called
-        // if (this.isRandomPlacement && !this.checkSurrounding(x, y)) {
-        //     return false;
-        // }
-
         if (direction === 'horizontal') {
             // Ensure the ship fits horizontally within bounds
             if (x + ship.length > this.size || y >= this.size) return false;
@@ -125,7 +120,7 @@ export class Gameboard {
             // Loop through x-offsets and y-offsets
             for (let dx of deltas) {
                 for (let dy of deltas) {
-                    // if (dx === 0 && dy === 0) continue;
+                    if (dx === 0 && dy === 0) continue;
                     // Neighbor x coordinate
                     const nx = x + (direction === 'horizontal' ? i : 0) + dx;
                     // Neighbor y coordinate
@@ -137,7 +132,7 @@ export class Gameboard {
                         nx < this.size &&
                         ny >= 0 &&
                         ny < this.size &&
-                        this.grid[ny][nx] === null
+                        this.grid[ny][nx] !== null
                     ) {
                         // Invalid placement due to proximity to another ship
                         return false;
@@ -171,20 +166,10 @@ export class Gameboard {
                 const startY = Math.floor(Math.random() * size);
                 const startCoordinates = [this.indexToLetter(startX), startY + 1];
 
-                const [x, y] = this.convertCoordinates(startCoordinates);
-                // console.log(x, y);
                 // Validate and place ship
-                // try {
-                //     this.placeShip(ship, startCoordinates, direction);
-                //     placed = true; // Exit loop if placement is successful
-                // } catch (error) {
-                //     // If placement is invalid, try again with different coordinates
-                //     continue;
-                // }
-
                 if (
-                    this.validatePlacement(ship, x, y, direction) &&
-                    this.checkSurrounding(x, y, ship.length, direction)
+                    this.validatePlacement(ship, startX, startY, direction) &&
+                    this.checkSurrounding(startX, startY, ship.length, direction)
                 ) {
                     this.placeShip(ship, startCoordinates, direction);
                     placed = true;
