@@ -1,4 +1,4 @@
-import { Ship } from '../src/modules/classes/Ship';
+import { Ship, ShipManager } from '../src/modules/classes/Ship';
 
 describe('Ship class initialization', () => {
     test('Ship object created with id', () => {
@@ -50,5 +50,119 @@ describe('Ship methods', () => {
         patrolBoat.hit();
         patrolBoat.hit();
         expect(patrolBoat.isSunk()).toBe(true);
+    });
+});
+
+describe('Ship manager', () => {
+    let shipManager;
+    let carrier;
+    let battleship;
+    let patrolBoat;
+
+    beforeEach(() => {
+        shipManager = new ShipManager();
+        carrier = Ship.create(Ship.Types.CARRIER);
+        battleship = Ship.create(Ship.Types.BATTLESHIP);
+        patrolBoat = Ship.create(Ship.Types.PATROL_BOAT);
+    });
+
+    test('should add a new ship', () => {
+        shipManager.addShip(battleship);
+
+        const addShip = shipManager.listShips();
+        expect(addShip).toContain(battleship);
+    });
+
+    test('should remove a ship by its id', () => {
+        shipManager.addShip(carrier);
+        shipManager.addShip(battleship);
+
+        const removed = shipManager.removeShip(carrier.id);
+        expect(removed).toBe(true);
+        expect(shipManager.listShips()).not.toContain(carrier);
+    });
+
+    test('should return false when removing a non-existent ship', () => {
+        const removed = shipManager.removeShip(999);
+
+        expect(removed).toBe(false);
+    });
+
+    test('should find ship by its id', () => {
+        shipManager.addShip(carrier);
+        shipManager.addShip(battleship);
+
+        const foundShip = shipManager.findShipById(carrier.id);
+        expect(foundShip).toBe(carrier);
+    });
+
+    test('should return null when given non-existing id', () => {
+        shipManager.addShip(battleship);
+
+        const foundShip = shipManager.findShipById(999);
+        expect(foundShip).toBe(null);
+    });
+
+    test('should list all ships', () => {
+        shipManager.addShip(battleship);
+        shipManager.addShip(carrier);
+        shipManager.addShip(patrolBoat);
+
+        const listShips = shipManager.listShips();
+        expect(listShips).toEqual([battleship, carrier, patrolBoat]);
+    });
+
+    test('should get all active ships', () => {
+        shipManager.addShip(battleship);
+
+        const activeShips = shipManager.getActiveShips();
+        expect(activeShips).toContain(battleship);
+    });
+
+    test('should get all sunk ships', () => {
+        shipManager.addShip(patrolBoat);
+        patrolBoat.hit();
+        patrolBoat.hit();
+
+        const sunkShips = shipManager.getSunkShips();
+        expect(sunkShips).toContain(patrolBoat);
+    });
+
+    test('should get active ships count', () => {
+        shipManager.addShip(battleship);
+        battleship.hit();
+
+        const activeShipCount = shipManager.getActiveShipCount();
+        expect(activeShipCount).toBe(1);
+    });
+
+    test('should get sunk ship count', () => {
+        shipManager.addShip(battleship);
+        shipManager.addShip(patrolBoat);
+
+        patrolBoat.hit();
+        patrolBoat.hit();
+
+        const sunkShipCount = shipManager.getSunkShipCount();
+        expect(sunkShipCount).toBe(1);
+    });
+
+    test('should get total count of ships ', () => {
+        shipManager.addShip(battleship);
+        shipManager.addShip(patrolBoat);
+        shipManager.addShip(carrier);
+
+        const totalShipsCount = shipManager.getTotalShips();
+        expect(totalShipsCount).toBe(3);
+    });
+
+    test('should clear all ships', () => {
+        shipManager.addShip(battleship);
+        shipManager.addShip(patrolBoat);
+        shipManager.addShip(carrier);
+
+        shipManager.clearShips();
+        let listShips = shipManager.listShips();
+        expect(listShips).toEqual([]);
     });
 });
