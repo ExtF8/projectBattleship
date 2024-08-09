@@ -187,7 +187,7 @@ describe('Gameboard', () => {
         };
 
         // Verify that no ships are next to each other
-        logGrid(randomGameboard);
         checkForAdjacentShips(randomGameboard.grid);
+        logGrid(randomGameboard);
     });
 });
