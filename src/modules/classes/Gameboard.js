@@ -33,16 +33,6 @@ export class Gameboard {
     }
 
     /**
-     * Converts a letter to its corresponding index.
-     *
-     * @param {string} letter - A letter to convert
-     * @returns {number} - The index of the letter
-     */
-    letterToIndex(letter) {
-        return letter.charCodeAt() - 'A'.charCodeAt(0);
-    }
-
-    /**
      * Places the ship on the grid at the specified coordinates and direction.
      *
      * @param {Object} ship - The ship to place.
@@ -70,6 +60,44 @@ export class Gameboard {
             }
         }
         this.ships.push(ship);
+    }
+
+    /**
+     * Places ships randomly on the board.
+     *
+     * @param {Object} ships - The ships to place.
+     */
+    placeShipsRandomly(ships) {
+        const size = this.grid.length;
+
+        Object.values(ships).forEach(ship => {
+            let placed = false;
+
+            let attempts = 0;
+            const maxAttempts = 100;
+            while (!placed && attempts < maxAttempts) {
+                attempts++;
+                // Randomly choose direction (horizontal or vertical)
+                const direction = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+
+                // Randomly choose starting coordinates
+                const startX = Math.floor(Math.random() * size);
+                const startY = Math.floor(Math.random() * size);
+                const startCoordinates = [this.indexToLetter(startX), startY + 1];
+
+                // Validate and place ship
+                if (
+                    this.validatePlacement(ship, startX, startY, direction) &&
+                    this.checkSurrounding(startX, startY, ship.length, direction)
+                ) {
+                    this.placeShip(ship, startCoordinates, direction);
+                    placed = true;
+                }
+            }
+            if (!placed) {
+                throw new Error('Failed to place ship after many attempts');
+            }
+        });
     }
 
     /**
@@ -153,44 +181,6 @@ export class Gameboard {
     }
 
     /**
-     * Places ships randomly on the board.
-     *
-     * @param {Object} ships - The ships to place.
-     */
-    placeShipsRandomly(ships) {
-        const size = this.grid.length;
-
-        Object.values(ships).forEach(ship => {
-            let placed = false;
-
-            let attempts = 0;
-            const maxAttempts = 100;
-            while (!placed && attempts < maxAttempts) {
-                attempts++;
-                // Randomly choose direction (horizontal or vertical)
-                const direction = Math.random() < 0.5 ? 'horizontal' : 'vertical';
-
-                // Randomly choose starting coordinates
-                const startX = Math.floor(Math.random() * size);
-                const startY = Math.floor(Math.random() * size);
-                const startCoordinates = [this.indexToLetter(startX), startY + 1];
-
-                // Validate and place ship
-                if (
-                    this.validatePlacement(ship, startX, startY, direction) &&
-                    this.checkSurrounding(startX, startY, ship.length, direction)
-                ) {
-                    this.placeShip(ship, startCoordinates, direction);
-                    placed = true;
-                }
-            }
-            if (!placed) {
-                throw new Error('Failed to place ship after many attempts');
-            }
-        });
-    }
-
-    /**
      * Retrieves the ship at the specified coordinates.
      *
      * @param {Array} coordinates - The coordinates of the to retrieve ship from [letter, number].
@@ -246,6 +236,16 @@ export class Gameboard {
         const y = number - 1;
 
         return [x, y];
+    }
+
+    /**
+     * Converts a letter to its corresponding index.
+     *
+     * @param {string} letter - A letter to convert
+     * @returns {number} - The index of the letter
+     */
+    letterToIndex(letter) {
+        return letter.charCodeAt() - 'A'.charCodeAt(0);
     }
 
     /**
