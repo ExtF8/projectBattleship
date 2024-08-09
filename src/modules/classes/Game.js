@@ -1,5 +1,5 @@
-import { Player } from '../classes/Player';
-import { Ship, ShipManager } from '../classes/Ship';
+import { Player } from './Player';
+import { Ship, ShipManager } from './Ship';
 
 /**
  * Represents a game of Battleship.
