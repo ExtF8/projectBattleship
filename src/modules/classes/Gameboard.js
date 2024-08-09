@@ -78,14 +78,14 @@ export class Gameboard {
      * @param {Object} ship - The ship to place.
      * @param {number} x - The starting x-coordinate.
      * @param {number} y - The starting y-coordinate.
-     * @param {string} direction - The direction to place the ship (horizontal or vertical).
+     * @param {string} direction - The direction of the ship (horizontal or vertical).
      * @returns {boolean} - True if placement is valid, otherwise false.
      */
     validatePlacement(ship, x, y, direction) {
         if (direction === 'horizontal') {
             // Ensure the ship fits horizontally within bounds
             if (x + ship.length > this.size || y >= this.size) return false;
-            // Check each cell the ship would occupy for overlap or proximity
+            // Check each cell the ship would occupy for overlap
             for (let i = 0; i < ship.length; i++) {
                 if (
                     x + i >= this.size ||
@@ -98,7 +98,7 @@ export class Gameboard {
         } else if (direction === 'vertical') {
             // Ensure the ship fits vertically within bounds
             if (y + ship.length > this.size || x >= this.size) return false;
-            // Check each cell the ship would occupy for overlap or proximity
+            // Check each cell the ship would occupy for overlap
             for (let i = 0; i < ship.length; i++) {
                 if (
                     y + i >= this.size ||
@@ -112,7 +112,15 @@ export class Gameboard {
         return true;
     }
 
-    // Helper function to check surrounding cells
+    /**
+     * Helper function to check if the cells surrounding a potential ship placement are empty.
+     *
+     * @param {number} x - The starting x-coordinate.
+     * @param {number} y - The starting y-coordinate.
+     * @param {number} length - The length of the ship.
+     * @param {string} direction - The direction of the ship (horizontal or vertical).
+     * @returns {Boolean} Returns true if surrounding cells are empty, otherwise false.
+     */
     checkSurrounding(x, y, length, direction) {
         // Ofsets surrounding cells
         const deltas = [-1, 0, 1];
@@ -143,6 +151,7 @@ export class Gameboard {
         // Valid placement with surrounding cells empty
         return true;
     }
+
     /**
      * Places ships randomly on the board.
      *
