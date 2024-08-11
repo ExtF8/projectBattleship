@@ -12,6 +12,7 @@ export class Game {
      *
      */
     constructor() {
+        this.startGame = false;
         this.playerOne = null;
         this.playerTwo = null;
         this.currentTurn = null;
@@ -24,6 +25,9 @@ export class Game {
      * Initializes the game by creating players, ships, and setting the starting turn.
      */
     initializeGame() {
+        this.resetGame();
+        this.startGame = true;
+
         this.playerOne = new Player(1, 'Human', false);
         this.playerTwo = new Player(2, 'Computer', true);
         this.initShips();
@@ -97,11 +101,9 @@ export class Game {
      * @throws {Error} Throws an error if the game is already over.
      */
     takeTurn(coordinates) {
-        // Check if game is over
-        if (this.gameIsOver()) {
+        if (this.isGameOver) {
             throw new Error('Game is over');
         }
-
         // Define attacking and defending player
         const attackingPlayer = this.currentTurn;
         const defendingPlayer = this.getOpponent();
@@ -122,18 +124,6 @@ export class Game {
     }
 
     /**
-     * Checks if the game is over (i.e., if all ships of one player are sunk).
-     *
-     * @returns {boolean} True if the game is over; otherwise, false.
-     */
-    gameIsOver() {
-        if (this.playerOne.gameboard.allShipsSunk() || this.playerTwo.gameboard.allShipsSunk()) {
-            this.isGameOver = true;
-        }
-        return this.isGameOver;
-    }
-
-    /**
      * Gets the player who is not currently taking their turn.
      *
      * @returns {Player} The opponent player.
@@ -149,6 +139,7 @@ export class Game {
      */
     checkForWin(defendingPlayer) {
         if (defendingPlayer.gameboard.allShipsSunk()) {
+            this.isGameOver = true;
             this.declareWinner(defendingPlayer);
         }
     }
@@ -176,10 +167,11 @@ export class Game {
      * Resets game to its initial state.
      */
     resetGame() {
+        this.startGame = false;
+        this.isGameOver = false;
         this.playerOne = null;
         this.playerTwo = null;
         this.currentTurn = null;
-        this.isGameOver = false;
         this.shipManager.clearShips();
     }
 }
