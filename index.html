@@ -1,13 +1,379 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Battleship</title>
-    <link rel="stylesheet" href="./styles/style.css">
-    <script src="./src/index.js" defer></script>
-</head>
-<body>
-    
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Battleship</title>
+        <link rel="stylesheet" href="./styles/reset.css" />
+        <link rel="stylesheet" href="./styles/style.css" />
+        <script src="./src/index.js" defer></script>
+    </head>
+    <body>
+        <header>
+            <h1>Battleship</h1>
+        </header>
+        <div id="content">
+            <div class="battlefields-container">
+                <div class="battlefield battlefield-playerOne">
+                    <h2 class="player">Player One</h2>
+                    <div class="gameboard-container">
+                        <div class="stats">
+                            <div class="game-progress">
+                                <ol class="progress">
+                                    <li class="stat">
+                                        <p>Hits:</p>
+                                        <p class="hits">0</p>
+                                    </li>
+                                    <li class="stat">
+                                        <p>Misses:</p>
+                                        <p class="misses">0</p>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="ship-types">
+                                <ol class="ships">
+                                    <li class="ship">
+                                        <p class="ship-title">Carrier</p>
+                                        <ul class="ship-size">
+                                            <li class="ship-block"></li>
+                                            <li class="ship-block"></li>
+                                            <li class="ship-block"></li>
+                                            <li class="ship-block"></li>
+                                            <li class="ship-block"></li>
+                                        </ul>
+                                    </li>
+                                    <li class="ship">
+                                        <p class="ship-title">Battleship</p>
+                                        <ul class="ship-size">
+                                            <li class="ship-block"></li>
+                                            <li class="ship-block"></li>
+                                            <li class="ship-block"></li>
+                                            <li class="ship-block"></li>
+                                        </ul>
+                                    </li>
+                                    <li class="ship">
+                                        <p class="ship-title">Destroyer</p>
+                                        <ul class="ship-size">
+                                            <li class="ship-block"></li>
+                                            <li class="ship-block"></li>
+                                            <li class="ship-block"></li>
+                                        </ul>
+                                    </li>
+                                    <li class="ship">
+                                        <p class="ship-title">Submarine</p>
+                                        <ul class="ship-size">
+                                            <li class="ship-block"></li>
+                                            <li class="ship-block"></li>
+                                            <li class="ship-block"></li>
+                                        </ul>
+                                    </li>
+                                    <li class="ship">
+                                        <p class="ship-title">Patrol Boat</p>
+                                        <ul class="ship-size">
+                                            <li class="ship-block"></li>
+                                            <li class="ship-block"></li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="gameboard gameboard-playerOne">
+                            <div class="cell div1"></div>
+                            <div class="cell div2"></div>
+                            <div class="cell div3"></div>
+                            <div class="cell div4"></div>
+                            <div class="cell div5"></div>
+                            <div class="cell div6"></div>
+                            <div class="cell div7"></div>
+                            <div class="cell div8"></div>
+                            <div class="cell div9"></div>
+                            <div class="cell div10"></div>
+                            <div class="cell div11"></div>
+                            <div class="cell div12"></div>
+                            <div class="cell div13"></div>
+                            <div class="cell div14"></div>
+                            <div class="cell div15"></div>
+                            <div class="cell div16"></div>
+                            <div class="cell div17"></div>
+                            <div class="cell div18"></div>
+                            <div class="cell div19"></div>
+                            <div class="cell div20"></div>
+                            <div class="cell div21"></div>
+                            <div class="cell div22"></div>
+                            <div class="cell div23"></div>
+                            <div class="cell div24"></div>
+                            <div class="cell div25"></div>
+                            <div class="cell div26"></div>
+                            <div class="cell div27"></div>
+                            <div class="cell div28"></div>
+                            <div class="cell div29"></div>
+                            <div class="cell div30"></div>
+                            <div class="cell div31"></div>
+                            <div class="cell div32"></div>
+                            <div class="cell div33"></div>
+                            <div class="cell div34"></div>
+                            <div class="cell div35"></div>
+                            <div class="cell div36"></div>
+                            <div class="cell div37"></div>
+                            <div class="cell div38"></div>
+                            <div class="cell div39"></div>
+                            <div class="cell div40"></div>
+                            <div class="cell div41"></div>
+                            <div class="cell div42"></div>
+                            <div class="cell div43"></div>
+                            <div class="cell div44"></div>
+                            <div class="cell div45"></div>
+                            <div class="cell div46"></div>
+                            <div class="cell div47"></div>
+                            <div class="cell div48"></div>
+                            <div class="cell div49"></div>
+                            <div class="cell div50"></div>
+                            <div class="cell div51"></div>
+                            <div class="cell div52"></div>
+                            <div class="cell div53"></div>
+                            <div class="cell div54"></div>
+                            <div class="cell div55"></div>
+                            <div class="cell div56"></div>
+                            <div class="cell div57"></div>
+                            <div class="cell div58"></div>
+                            <div class="cell div59"></div>
+                            <div class="cell div60"></div>
+                            <div class="cell div61"></div>
+                            <div class="cell div62"></div>
+                            <div class="cell div63"></div>
+                            <div class="cell div64"></div>
+                            <div class="cell div65"></div>
+                            <div class="cell div66"></div>
+                            <div class="cell div67"></div>
+                            <div class="cell div68"></div>
+                            <div class="cell div69"></div>
+                            <div class="cell div70"></div>
+                            <div class="cell div71"></div>
+                            <div class="cell div72"></div>
+                            <div class="cell div73"></div>
+                            <div class="cell div74"></div>
+                            <div class="cell div75"></div>
+                            <div class="cell div76"></div>
+                            <div class="cell div77"></div>
+                            <div class="cell div78"></div>
+                            <div class="cell div79"></div>
+                            <div class="cell div80"></div>
+                            <div class="cell div81"></div>
+                            <div class="cell div82"></div>
+                            <div class="cell div83"></div>
+                            <div class="cell div84"></div>
+                            <div class="cell div85"></div>
+                            <div class="cell div86"></div>
+                            <div class="cell div87"></div>
+                            <div class="cell div88"></div>
+                            <div class="cell div89"></div>
+                            <div class="cell div90"></div>
+                            <div class="cell div91"></div>
+                            <div class="cell div92"></div>
+                            <div class="cell div93"></div>
+                            <div class="cell div94"></div>
+                            <div class="cell div95"></div>
+                            <div class="cell div96"></div>
+                            <div class="cell div97"></div>
+                            <div class="cell div98"></div>
+                            <div class="cell div99"></div>
+                            <div class="cell div100"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="battlefield battlefield-playerTwo">
+                    <h2 class="player playerTwo">Player Two</h2>
+                    <div class="gameboard-container gameboard-container-playerTwo">
+                        <div class="stats">
+                            <div class="game-progress">
+                                <ol class="progress">
+                                    <li class="stat">
+                                        <p>Hits:</p>
+                                        <p class="hits">0</p>
+                                    </li>
+                                    <li class="stat">
+                                        <p>Misses:</p>
+                                        <p class="misses">0</p>
+                                    </li>
+                                </ol>
+                                <div class="ship-types">
+                                    <ol class="ships">
+                                        <li class="ship">
+                                            <p class="ship-title">Carrier</p>
+                                            <ul class="ship-size">
+                                                <li class="ship-block"></li>
+                                                <li class="ship-block"></li>
+                                                <li class="ship-block"></li>
+                                                <li class="ship-block"></li>
+                                                <li class="ship-block"></li>
+                                            </ul>
+                                        </li>
+                                        <li class="ship">
+                                            <p class="ship-title">Battleship</p>
+                                            <ul class="ship-size">
+                                                <li class="ship-block"></li>
+                                                <li class="ship-block"></li>
+                                                <li class="ship-block"></li>
+                                                <li class="ship-block"></li>
+                                            </ul>
+                                        </li>
+                                        <li class="ship">
+                                            <p class="ship-title">Destroyer</p>
+                                            <ul class="ship-size">
+                                                <li class="ship-block"></li>
+                                                <li class="ship-block"></li>
+                                                <li class="ship-block"></li>
+                                            </ul>
+                                        </li>
+                                        <li class="ship">
+                                            <p class="ship-title">Submarine</p>
+                                            <ul class="ship-size">
+                                                <li class="ship-block"></li>
+                                                <li class="ship-block"></li>
+                                                <li class="ship-block"></li>
+                                            </ul>
+                                        </li>
+                                        <li class="ship">
+                                            <p class="ship-title">Patrol Boat</p>
+                                            <ul class="ship-size">
+                                                <li class="ship-block"></li>
+                                                <li class="ship-block"></li>
+                                            </ul>
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gameboard gameboard-playerTwo">
+                            <div class="cell div1"></div>
+                            <div class="cell div2"></div>
+                            <div class="cell div3"></div>
+                            <div class="cell div4"></div>
+                            <div class="cell div5"></div>
+                            <div class="cell div6"></div>
+                            <div class="cell div7"></div>
+                            <div class="cell div8"></div>
+                            <div class="cell div9"></div>
+                            <div class="cell div10"></div>
+                            <div class="cell div11"></div>
+                            <div class="cell div12"></div>
+                            <div class="cell div13"></div>
+                            <div class="cell div14"></div>
+                            <div class="cell div15"></div>
+                            <div class="cell div16"></div>
+                            <div class="cell div17"></div>
+                            <div class="cell div18"></div>
+                            <div class="cell div19"></div>
+                            <div class="cell div20"></div>
+                            <div class="cell div21"></div>
+                            <div class="cell div22"></div>
+                            <div class="cell div23"></div>
+                            <div class="cell div24"></div>
+                            <div class="cell div25"></div>
+                            <div class="cell div26"></div>
+                            <div class="cell div27"></div>
+                            <div class="cell div28"></div>
+                            <div class="cell div29"></div>
+                            <div class="cell div30"></div>
+                            <div class="cell div31"></div>
+                            <div class="cell div32"></div>
+                            <div class="cell div33"></div>
+                            <div class="cell div34"></div>
+                            <div class="cell div35"></div>
+                            <div class="cell div36"></div>
+                            <div class="cell div37"></div>
+                            <div class="cell div38"></div>
+                            <div class="cell div39"></div>
+                            <div class="cell div40"></div>
+                            <div class="cell div41"></div>
+                            <div class="cell div42"></div>
+                            <div class="cell div43"></div>
+                            <div class="cell div44"></div>
+                            <div class="cell div45"></div>
+                            <div class="cell div46"></div>
+                            <div class="cell div47"></div>
+                            <div class="cell div48"></div>
+                            <div class="cell div49"></div>
+                            <div class="cell div50"></div>
+                            <div class="cell div51"></div>
+                            <div class="cell div52"></div>
+                            <div class="cell div53"></div>
+                            <div class="cell div54"></div>
+                            <div class="cell div55"></div>
+                            <div class="cell div56"></div>
+                            <div class="cell div57"></div>
+                            <div class="cell div58"></div>
+                            <div class="cell div59"></div>
+                            <div class="cell div60"></div>
+                            <div class="cell div61"></div>
+                            <div class="cell div62"></div>
+                            <div class="cell div63"></div>
+                            <div class="cell div64"></div>
+                            <div class="cell div65"></div>
+                            <div class="cell div66"></div>
+                            <div class="cell div67"></div>
+                            <div class="cell div68"></div>
+                            <div class="cell div69"></div>
+                            <div class="cell div70"></div>
+                            <div class="cell div71"></div>
+                            <div class="cell div72"></div>
+                            <div class="cell div73"></div>
+                            <div class="cell div74"></div>
+                            <div class="cell div75"></div>
+                            <div class="cell div76"></div>
+                            <div class="cell div77"></div>
+                            <div class="cell div78"></div>
+                            <div class="cell div79"></div>
+                            <div class="cell div80"></div>
+                            <div class="cell div81"></div>
+                            <div class="cell div82"></div>
+                            <div class="cell div83"></div>
+                            <div class="cell div84"></div>
+                            <div class="cell div85"></div>
+                            <div class="cell div86"></div>
+                            <div class="cell div87"></div>
+                            <div class="cell div88"></div>
+                            <div class="cell div89"></div>
+                            <div class="cell div90"></div>
+                            <div class="cell div91"></div>
+                            <div class="cell div92"></div>
+                            <div class="cell div93"></div>
+                            <div class="cell div94"></div>
+                            <div class="cell div95"></div>
+                            <div class="cell div96"></div>
+                            <div class="cell div97"></div>
+                            <div class="cell div98"></div>
+                            <div class="cell div99"></div>
+                            <div class="cell div100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+            <div class="footer_container">
+                <ul class="footer_ul">
+                    <li class="footer_li">
+                        <a href="https://github.com/ExtF8" target="_blank" class="footer_link"
+                            >Who Made This Web Page</a
+                        >
+                    </li>
+                    <li class="footer_li">
+                        <a
+                            href="https://www.theodinproject.com/lessons/node-path-javascript-weather-app"
+                            target="_blank"
+                            class="footer_link"
+                            >And Why</a
+                        >
+                    </li>
+                    <li class="footer_li">
+                        <a href="#" target="_top" class="footer_link"
+                            >Three looks better than two</a
+                        >
+                    </li>
+                </ul>
+                <span class="footer_copyright">© 2024 Copyright</span>
+            </div>
+        </footer>
+    </body>
 </html>
