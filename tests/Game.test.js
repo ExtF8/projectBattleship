@@ -2,8 +2,6 @@ import { Ship } from '../src/modules/classes/Ship';
 import { Game } from '../src/modules/game/game';
 import { logGrid } from '../src/utility/logHelper';
 
-// TODO: write tests for game class
-// this is a test
 describe('Game logic', () => {
     let game;
 
