@@ -40,8 +40,9 @@ header {
 
 #content {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     min-height: 100vh;
+    padding-top: 5vw;
     background-color: var(--medium);
 }
 
@@ -62,12 +63,36 @@ header {
     align-items: flex-start;
     justify-content: space-evenly;
     width: 100vw;
-    padding-top: 5vw;
 }
 
 .battlefield {
     display: flex;
     flex-direction: column;
+}
+
+.button-container {
+    display: flex;
+    margin: 20px;
+    justify-content: center;
+}
+
+.game-button {
+    width: 200px;
+    margin-inline: 20px;
+    padding: 10px 25px;
+    border: 0.5px solid #d1d5db;
+    background-color: transparent;
+    color: var(--bodyTextColorWhite);
+    font-family: inherit;
+    font-size: 1.2em;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: transform 0.3s;
+}
+
+.game-button:hover {
+    box-shadow: -3px 3px 5px 2px rgba(0, 0, 0, 0.1);
+    transform: scale(1.03);
 }
 
 .player {
@@ -128,7 +153,20 @@ header {
     margin-block: 6px;
     width: 12px;
     height: 12px;
-    border: 1px solid seashell;
+    border: 1px solid;
+
+}
+
+.ship-block-default {
+    background-color: var(--sunny);
+}
+
+.ship-block-placed {
+    background-color: lightgreen;
+}
+
+.ship-block-hit {
+    background-color: red;
 }
 
 .gameboard-container-playerTwo {
@@ -138,9 +176,7 @@ header {
 .gameboard {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
-    grid-template-rows: repeat(10, 1fr);
-    grid-column-gap: 5px;
-    grid-row-gap: 5px;
+    grid-gap: 5px;
 }
 
 .cell {
@@ -151,12 +187,55 @@ header {
     justify-content: center;
     font-size: 36px;
     cursor: pointer;
-    border: 1px solid red;
+    border: 1px solid mediumaquamarine;
 
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
 }
+
+.cell:not(.marked):hover {
+    transform: scale(1.03);
+}
+
+.cell-placed {
+    fill: lightgreen;
+}
+
+.cell-hit {
+    fill: red;
+}
+
+/* Styling for the X symbol */
+.x::before,
+.x::after {
+    content: "";
+    position: absolute;
+    width: 3px;
+    height: 49px;
+    transform-origin: center;
+    box-shadow: -2px 5px 3px 0px rgba(0, 0, 0, 0.2);
+}
+
+.xHit::before,
+.xHit::after {
+    background-color: red;
+}
+
+.xMiss::before,
+.xMiss::after {
+    background-color: #313131;
+}
+
+.x::before {
+    transform: rotate(45deg);
+}
+
+.x::after {
+    transform: rotate(-45deg);
+}
+
+
 
 /* Cells */
 .div1 {
