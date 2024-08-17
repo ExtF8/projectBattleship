@@ -1,4 +1,4 @@
-import { Ship } from './Ship';
+import { Ship } from './Ship.js';
 
 /**
  * Represents a Gameboard.
@@ -30,6 +30,20 @@ export class Gameboard {
     createEmptyGrid(size) {
         const grid = Array.from({ length: size }, () => Array(size).fill(null));
         return grid;
+    }
+
+    // Method to clear ships from the grid
+    clearShips() {
+        this.grid.forEach((row, rowIndex) => {
+            row.forEach((cell, colIndex) => {
+                if (cell instanceof Ship) {
+                    this.grid[rowIndex][colIndex] = null; // Clear the cell
+                }
+            });
+        });
+
+        // Optionally clear the ships array
+        this.ships = [];
     }
 
     /**
@@ -84,6 +98,16 @@ export class Gameboard {
                 const startX = Math.floor(Math.random() * size);
                 const startY = Math.floor(Math.random() * size);
                 const startCoordinates = [this.indexToLetter(startX), startY + 1];
+                let positions = [];
+
+                // Calculate all positions based on the direction
+                for (let i = 0; i < ship.length; i++) {
+                    if (direction === 'horizontal') {
+                        positions.push([this.indexToLetter(startX + i), startY + 1]);
+                    } else {
+                        positions.push([this.indexToLetter(startX), startY + 1 + i]);
+                    }
+                }
 
                 // Validate and place ship
                 if (
@@ -91,6 +115,7 @@ export class Gameboard {
                     this.checkSurrounding(startX, startY, ship.length, direction)
                 ) {
                     this.placeShip(ship, startCoordinates, direction);
+                    ship.positions = positions;
                     placed = true;
                 }
             }
