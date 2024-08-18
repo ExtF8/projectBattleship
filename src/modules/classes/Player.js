@@ -83,7 +83,7 @@ export class Player {
      * Makes computer-controlled attack on an opponent.
      *
      * @param {Player} opponent - The opponent player.
-     * @returns {Array} - The coordinates of the attack [letter, number].
+     * @returns {Boolean} - Returns true if attack was valid, else false.
      */
     computerAttack(opponent) {
         let coordinates;
@@ -95,7 +95,7 @@ export class Player {
             validAttack = this.attack(opponent, coordinates);
         } while (!validAttack);
 
-        return coordinates;
+        return validAttack;
     }
 
     /**
