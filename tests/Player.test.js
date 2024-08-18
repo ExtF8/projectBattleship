@@ -61,17 +61,19 @@ describe('Player', () => {
         expect(attackResult).toBe(false);
     });
 
-    test('computer player should attack on random coordinates', () => {
-        const attackCoordinates = computer.computerAttack(player1);
+    test('computer player should perform an attack and update attack history', () => {
+        const attack = computer.computerAttack(player1);
 
-        expect(Array.isArray(attackCoordinates)).toBe(true);
-        expect(attackCoordinates.length).toBe(2);
+        expect(attack).toBe(true);
+        expect(computer.attackHistory.length).toBe(1);
     });
 
     test('should record hit form computer', () => {
+        let initialHits = computer.hits
         const attackResult = computer.attack(player1, ['C', 1]);
 
         expect(attackResult).toBe(true);
+        expect(computer.hits).toBe(initialHits + 1)
     });
 
     test('should record a miss from computer', () => {
