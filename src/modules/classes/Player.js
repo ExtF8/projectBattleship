@@ -21,6 +21,9 @@ export class Player {
         this.attackHistory = [];
         this.hits = 0;
         this.misses = 0;
+        this.lastHit = null; // Track the last successful hit
+        this.lastDirection = null; // Track the direction of the last hit
+        this.adjacentCells = []; // Track potential adjacent cells to attack
     }
 
     /**
@@ -85,28 +88,80 @@ export class Player {
      * @param {Player} opponent - The opponent player.
      * @returns {Boolean} - Returns true if attack was valid, else false.
      */
+
     computerAttack(opponent) {
         let coordinates;
         let validAttack = false;
 
-        // Keep trying random coordinates until a valid attack is made.
-        do {
+        // If there are adjacent cells to attack, prioritize those.
+        if (this.adjacentCells.length > 0) {
+            coordinates = this.adjacentCells.shift(); // Get the next adjacent cell
+            validAttack = this.attack(opponent, coordinates);
+        }
+
+        // If no valid attack was made or no adjacent cells to attack, choose random coordinates.
+        while (!validAttack) {
             coordinates = this.getRandomCoordinates();
             validAttack = this.attack(opponent, coordinates);
-        } while (!validAttack);
+        }
+
+        // If the attack was a hit, track the adjacent cells for future attacks.
+        if (validAttack && this.attackHistory[this.attackHistory.length - 1].result) {
+            const previousHit = this.lastHit;
+            this.lastHit = coordinates;
+            this.updateDirection(previousHit, coordinates);
+            this.adjacentCells = this.getAdjacentCells(coordinates).filter(
+                cell => this.isUniqueAttack(cell) && this.isValidDirection(cell)
+            );
+        }
 
         return validAttack;
     }
 
-    /**
-     * Generates random coordinates.
-     *
-     * @returns {Array} - The random coordinates for the attack.
-     */
+    updateDirection(previousHit, currentHit) {
+        if (previousHit && currentHit) {
+            const direction = this.getDirection(previousHit, currentHit);
+            if (direction) {
+                this.lastDirection = direction;
+            }
+        }
+    }
+
+    getDirection([prevLetter, prevNumber], [currLetter, currNumber]) {
+        if (prevLetter === currLetter) {
+            return prevNumber < currNumber ? 'down' : 'up';
+        } else if (prevNumber === currNumber) {
+            return prevLetter < currLetter ? 'right' : 'left';
+        }
+        return null;
+    }
+
+    isValidDirection([letter, number]) {
+        if (!this.lastDirection) return true;
+
+        const [prevLetter, prevNumber] = this.lastHit;
+        const direction = this.getDirection([prevLetter, prevNumber], [letter, number]);
+
+        return direction !== this.lastDirection;
+    }
+
     getRandomCoordinates() {
         const letters = 'ABCDEFGHIJ'.split('');
         const letter = letters[Math.floor(Math.random() * letters.length)];
         const number = Math.floor(Math.random() * 10) + 1;
         return [letter, number];
+    }
+
+    getAdjacentCells([letter, number]) {
+        const letters = 'ABCDEFGHIJ'.split('');
+        const letterIndex = letters.indexOf(letter);
+        const possibleCells = [];
+
+        if (letterIndex > 0) possibleCells.push([letters[letterIndex - 1], number]); // Left
+        if (letterIndex < 9) possibleCells.push([letters[letterIndex + 1], number]); // Right
+        if (number > 1) possibleCells.push([letter, number - 1]); // Above
+        if (number < 10) possibleCells.push([letter, number + 1]); // Below
+
+        return possibleCells;
     }
 }
