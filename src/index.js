@@ -55,10 +55,6 @@ function renderGameboard(grid, gridElement) {
             const cellElement = document.createElement('div');
             cellElement.classList.add('cell');
 
-            if (gridElement.id === 'playerTwoGameboard') {
-                cellElement.classList.add('cell-PlayerTwo');
-            }
-
             cellElement.dataset.row = rowIndex;
             cellElement.dataset.col = colIndex;
 
@@ -66,6 +62,11 @@ function renderGameboard(grid, gridElement) {
                 cellElement.classList.add('empty-cell');
             } else if (cell instanceof Ship) {
                 cellElement.classList.add('ship-cell');
+            }
+
+            if (gridElement.id === 'playerTwoGameboard') {
+                cellElement.classList.add('cell-PlayerTwo');
+                cellElement.classList.remove('ship-cell');
             }
 
             gridElement.appendChild(cellElement);
@@ -123,12 +124,28 @@ function handleAttack(row, col, gridElement) {
 
         updateCellUI(row, col, gridElement);
 
-        setTimeout(handleComputerAttack, 1000);
+        manageCellEvents(false);
+
+        togglePlayerTurnState(gridElement, true);
+        setTimeout(() => {
+            handleComputerAttack();
+
+            setTimeout(() => {
+                togglePlayerTurnState(gridElement, false);
+            }, 100);
+        }, 1000);
     }
 }
 
+function togglePlayerTurnState(gridElement, isWaiting) {
+    const cells = [...gridElement.childNodes];
+    cells.forEach(cell => {
+        cell.classList.toggle('waitTurn', isWaiting);
+    });
+}
+
 function handleComputerAttack() {
-    // Now handle the computer's turn, which happens inside takeTurn()
+    // Handle the computer's turn, which happens inside takeTurn()
     const lastComputerAttack =
         GAME.playerTwo.attackHistory[GAME.playerTwo.attackHistory.length - 1];
     if (lastComputerAttack) {
@@ -136,6 +153,7 @@ function handleComputerAttack() {
         // Update Player One's board UI for the computer's attack
         updateCellUI(computerRow, computerCol, playerOneGameboard);
     }
+    manageCellEvents(true);
 }
 
 function convertCoordinates(row, col) {

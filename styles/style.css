@@ -154,11 +154,11 @@ header {
     width: 12px;
     height: 12px;
     border: 1px solid;
-
 }
 
 .ship-block-default {
-    background-color: var(--sunny);
+    /* background-color: var(--sunny); */
+    background-color: lightgreen;
 }
 
 .ship-block-placed {
@@ -173,7 +173,8 @@ header {
     flex-direction: row-reverse;
 }
 
-#playerOneGameboard, #playerTwoGameboard {
+#playerOneGameboard,
+#playerTwoGameboard {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
     gap: 3px;
@@ -187,10 +188,14 @@ header {
     justify-content: center;
     font-size: 36px;
     border: 1px solid mediumaquamarine;
-    
+
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
+}
+
+.waitTurn {
+    border: 1px solid gray;
 }
 
 .cell-PlayerTwo:not(.marked):hover {
@@ -217,7 +222,7 @@ header {
 /* Styling for the X symbol */
 .x::before,
 .x::after {
-    content: "";
+    content: '';
     position: absolute;
     width: 30px;
     height: 30px;
@@ -242,8 +247,6 @@ header {
 .x::after {
     transform: rotate(-45deg);
 }
-
-
 
 /*-- -------------------------- -->
 <---           Footer           -->
