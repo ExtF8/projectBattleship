@@ -27,7 +27,7 @@ export class Player {
     }
 
     /**
-     * Attacks an oponent at the specified coordinates.
+     * Attacks an opponent at the specified coordinates.
      *
      * @param {Player} opponent - The opponent player.
      * @param {Array} coordinates - The coordinates of attack [letter, number].
@@ -88,7 +88,6 @@ export class Player {
      * @param {Player} opponent - The opponent player.
      * @returns {Boolean} - Returns true if attack was valid, else false.
      */
-
     computerAttack(opponent) {
         let coordinates;
         let validAttack = false;
@@ -97,12 +96,12 @@ export class Player {
         if (this.adjacentCells.length > 0) {
             coordinates = this.adjacentCells.shift(); // Get the next adjacent cell
             validAttack = this.attack(opponent, coordinates);
-        }
-
-        // If no valid attack was made or no adjacent cells to attack, choose random coordinates.
-        while (!validAttack) {
-            coordinates = this.getRandomCoordinates();
-            validAttack = this.attack(opponent, coordinates);
+        } else {
+            // If no valid attack was made or no adjacent cells to attack, choose random coordinates.
+            do {
+                coordinates = this.getRandomCoordinates();
+                validAttack = this.attack(opponent, coordinates);
+            } while (!validAttack);
         }
 
         // If the attack was a hit, track the adjacent cells for future attacks.
@@ -142,7 +141,7 @@ export class Player {
         const [prevLetter, prevNumber] = this.lastHit;
         const direction = this.getDirection([prevLetter, prevNumber], [letter, number]);
 
-        return direction !== this.lastDirection;
+        return direction === this.lastDirection;
     }
 
     getRandomCoordinates() {
