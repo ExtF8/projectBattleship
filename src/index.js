@@ -55,6 +55,10 @@ function renderGameboard(grid, gridElement) {
             const cellElement = document.createElement('div');
             cellElement.classList.add('cell');
 
+            if (gridElement.id === 'playerTwoGameboard') {
+                cellElement.classList.add('cell-PlayerTwo');
+            }
+
             cellElement.dataset.row = rowIndex;
             cellElement.dataset.col = colIndex;
 
@@ -99,6 +103,9 @@ function cellClickHandler(event, gridElement) {
 function updateCellUI(row, col, gridElement) {
     const cellSelector = `.cell[data-row="${row}"][data-col="${col}"]`;
     const cellElement = gridElement.querySelector(cellSelector);
+
+    cellElement.classList.add('marked');
+
     const grid =
         gridElement.id === 'playerOneGameboard'
             ? GAME.playerOne.gameboard.grid
