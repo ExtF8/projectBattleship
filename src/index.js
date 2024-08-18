@@ -96,6 +96,43 @@ function cellClickHandler(event) {
     cell.removeEventListener('click', cellClickHandler);
 }
 
+function handleAttack(row, col, gridElement) {
+    const [x, y] = convertCoordinates(row, col);
+
+    if (gridElement.id === 'playerTwoGameboard') {
+        GAME.takeTurn([x, y]);
+
+        updateCellUI(row, col, gridElement);
+        updatePlayerOneScore();
+        updatePlayerTwoShipsStats(row, col);
+
+        manageCellEvents(false);
+
+        togglePlayerTurnState(gridElement, true);
+        setTimeout(() => {
+            handleComputerAttack();
+
+            setTimeout(() => {
+                updatePlayerTwoScore();
+                togglePlayerTurnState(gridElement, false);
+            }, 100);
+        }, 1000);
+    }
+}
+
+function handleComputerAttack() {
+    // Handle the computer's turn, which happens inside takeTurn()
+    const lastComputerAttack =
+        GAME.playerTwo.attackHistory[GAME.playerTwo.attackHistory.length - 1];
+    if (lastComputerAttack) {
+        const [computerRow, computerCol] = convertToGridCoordinates(lastComputerAttack.coordinates);
+        updatePlayerOneShipsStats(computerRow, computerCol);
+        // Update Player One's board UI for the computer's attack
+        updateCellUI(computerRow, computerCol, playerOneGameboard);
+    }
+    manageCellEvents(true);
+}
+
 function updateCellUI(row, col, gridElement) {
     const cellSelector = `.cell[data-row="${row}"][data-col="${col}"]`;
     const cellElement = gridElement.querySelector(cellSelector);
@@ -116,24 +153,62 @@ function updateCellUI(row, col, gridElement) {
     }
 }
 
-function handleAttack(row, col, gridElement) {
+// Helper function to update the score for any player
+function updatePlayerScore(player, hitElementId, missElementId) {
+    const hitStats = document.getElementById(hitElementId);
+    const missStats = document.getElementById(missElementId);
+
+    hitStats.innerText = player.hits;
+    missStats.innerText = player.misses;
+}
+
+// Function to update Player One's score
+function updatePlayerOneScore() {
+    updatePlayerScore(GAME.playerOne, 'playerOneHits', 'playerOneMisses');
+}
+
+// Function to update Player Two's score
+function updatePlayerTwoScore() {
+    updatePlayerScore(GAME.playerTwo, 'playerTwoHits', 'playerTwoMisses');
+}
+
+// Function to update Player One's ship stats
+function updatePlayerOneShipsStats(row, col) {
+    updatePlayerShipsStats(GAME.playerOne, row, col, 'playerOneShips');
+}
+
+// Function to update Player Two's ship stats
+function updatePlayerTwoShipsStats(row, col) {
+    updatePlayerShipsStats(GAME.playerTwo, row, col, 'playerTwoShips');
+}
+
+// Helper function to update ship stats for any player
+function updatePlayerShipsStats(player, row, col, shipElementId) {
     const [x, y] = convertCoordinates(row, col);
+    const ship = player.gameboard.getShipAt([x, y]);
+    const playerShips = document.getElementById(shipElementId);
 
-    if (gridElement.id === 'playerTwoGameboard') {
-        GAME.takeTurn([x, y]);
+    if (ship instanceof Ship && ship.hits >= 0) {
+        const shipType = ship.title;
+        const shipElements = playerShips.querySelectorAll('.ship');
 
-        updateCellUI(row, col, gridElement);
+        let shipElement = Array.from(shipElements).find(
+            el => el.querySelector('.ship-title').textContent === shipType
+        );
 
-        manageCellEvents(false);
+        if (shipElement) {
+            const shipBlocks = shipElement.querySelectorAll('.ship-block');
+            shipBlocks.forEach((block, index) => {
+                if (index < ship.hits) {
+                    block.classList.remove('ship-block-default');
+                    block.classList.add('ship-block-hit');
+                }
+            });
 
-        togglePlayerTurnState(gridElement, true);
-        setTimeout(() => {
-            handleComputerAttack();
-
-            setTimeout(() => {
-                togglePlayerTurnState(gridElement, false);
-            }, 100);
-        }, 1000);
+            if (ship.isSunk()) {
+                shipElement.querySelector('.ship-title').classList.add('ship-title-after-sunk');
+            }
+        }
     }
 }
 
@@ -142,18 +217,6 @@ function togglePlayerTurnState(gridElement, isWaiting) {
     cells.forEach(cell => {
         cell.classList.toggle('waitTurn', isWaiting);
     });
-}
-
-function handleComputerAttack() {
-    // Handle the computer's turn, which happens inside takeTurn()
-    const lastComputerAttack =
-        GAME.playerTwo.attackHistory[GAME.playerTwo.attackHistory.length - 1];
-    if (lastComputerAttack) {
-        const [computerRow, computerCol] = convertToGridCoordinates(lastComputerAttack.coordinates);
-        // Update Player One's board UI for the computer's attack
-        updateCellUI(computerRow, computerCol, playerOneGameboard);
-    }
-    manageCellEvents(true);
 }
 
 function convertCoordinates(row, col) {

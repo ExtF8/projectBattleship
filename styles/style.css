@@ -143,6 +143,10 @@ header {
     font-size: 20px;
 }
 
+.ship-title-after-sunk {
+    text-decoration: line-through;
+}
+
 .ship-size {
     display: flex;
     flex-direction: row;
