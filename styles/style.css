@@ -186,15 +186,15 @@ header {
     align-items: center;
     justify-content: center;
     font-size: 36px;
-    cursor: pointer;
     border: 1px solid mediumaquamarine;
-
+    
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
 }
 
-.cell:not(.marked):hover {
+.cell-PlayerTwo:not(.marked):hover {
+    cursor: pointer;
     transform: scale(1.03);
 }
 
