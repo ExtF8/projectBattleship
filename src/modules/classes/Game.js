@@ -119,22 +119,44 @@ export default class Game {
         // Check if it's player one's turn (human)
         if (attackingPlayer === this.playerOne) {
             attackResult = attackingPlayer.attack(defendingPlayer, coordinates);
+            // Check for win condition after player's attack
+            if (attackResult) {
+                this.checkForWin(defendingPlayer);
+            }
+
+            // Switch to computer's turn if the game is not over
+            if (!this.isGameOver) {
+                this.switchTurn();
+                this.takeComputerTurn(); // Trigger computer's turn immediately
+            }
         } else {
             // It's player two's turn (computer)
-            attackResult = attackingPlayer.computerAttack(defendingPlayer);
+            attackResult = this.takeComputerTurn();
         }
 
-        // Check for win condition
+        return attackResult;
+    }
+
+    /**
+     * Handles the computer's turn.
+     *
+     */
+    takeComputerTurn() {
+        const attackingPlayer = this.playerTwo;
+        const defendingPlayer = this.playerOne;
+
+        const attackResult = attackingPlayer.computerAttack(defendingPlayer);
+
+        // Check for win condition after computer's attack
         if (attackResult) {
             this.checkForWin(defendingPlayer);
         }
 
-        // Switch turns only if the game is not over
+        // Switch back to player's turn if the game is not over
         if (!this.isGameOver) {
             this.switchTurn();
         }
 
-        // Return attackResult
         return attackResult;
     }
 
@@ -175,7 +197,6 @@ export default class Game {
      * Switches the current turn to the other player.
      */
     switchTurn() {
-        console.log(this.currentTurn);
         this.currentTurn = this.currentTurn === this.playerOne ? this.playerTwo : this.playerOne;
     }
 
