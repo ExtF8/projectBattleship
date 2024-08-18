@@ -68,36 +68,34 @@ function renderGameboard(grid, gridElement) {
                 cellElement.classList.add('ship-cell');
             }
 
-            if (gridElement.id === 'playerTwoGameboard') {
-                cellElement.addEventListener('click', event =>
-                    cellClickHandler(event, gridElement)
-                );
-            }
-
             gridElement.appendChild(cellElement);
         });
     });
 }
 
-function manageCellEvents(add) {
+function manageCellEvents(enable) {
+    console.log('manageCellEvents: ', enable);
     const cells = playerTwoGameboard.querySelectorAll('.cell');
     cells.forEach(cell => {
-        if (add) {
-            cell.addEventListener('click', event => cellClickHandler(event, playerTwoGameboard));
+        if (enable) {
+            cell.addEventListener('click', cellClickHandler);
+            console.log('manageCellEvents: ', enable);
         } else {
-            cell.removeEventListener('click', event => cellClickHandler(event, playerTwoGameboard));
+            cell.removeEventListener('click', cellClickHandler);
+            console.log('manageCellEvents: ', enable);
         }
     });
 }
 
-function cellClickHandler(event, gridElement) {
+function cellClickHandler(event) {
     const cell = event.currentTarget;
     const row = parseInt(cell.dataset.row, 10);
     const col = parseInt(cell.dataset.col, 10);
 
-    handleAttack(row, col, gridElement);
+    handleAttack(row, col, playerTwoGameboard);
 
-    cell.removeEventListener('click', cellClickHandler); // Prevent repeated clicks on the same cell
+    // Prevent repeated clicks on the same cell by removing the event listener
+    cell.removeEventListener('click', cellClickHandler);
 }
 
 function updateCellUI(row, col, gridElement) {
@@ -110,6 +108,7 @@ function updateCellUI(row, col, gridElement) {
         gridElement.id === 'playerOneGameboard'
             ? GAME.playerOne.gameboard.grid
             : GAME.playerTwo.gameboard.grid;
+
     const cellContent = grid[row][col];
 
     if (cellContent instanceof Ship) {
