@@ -74,15 +74,12 @@ function renderGameboard(grid, gridElement) {
 }
 
 function manageCellEvents(enable) {
-    console.log('manageCellEvents: ', enable);
     const cells = playerTwoGameboard.querySelectorAll('.cell');
     cells.forEach(cell => {
         if (enable) {
             cell.addEventListener('click', cellClickHandler);
-            console.log('manageCellEvents: ', enable);
         } else {
             cell.removeEventListener('click', cellClickHandler);
-            console.log('manageCellEvents: ', enable);
         }
     });
 }
@@ -126,16 +123,18 @@ function handleAttack(row, col, gridElement) {
 
         updateCellUI(row, col, gridElement);
 
-        // Now handle the computer's turn, which happens inside takeTurn()
-        const lastComputerAttack =
-            GAME.playerTwo.attackHistory[GAME.playerTwo.attackHistory.length - 1];
-        if (lastComputerAttack) {
-            const [computerRow, computerCol] = convertToGridCoordinates(
-                lastComputerAttack.coordinates
-            );
-            // Update Player One's board UI for the computer's attack
-            updateCellUI(computerRow, computerCol, playerOneGameboard);
-        }
+        setTimeout(handleComputerAttack, 1000);
+    }
+}
+
+function handleComputerAttack() {
+    // Now handle the computer's turn, which happens inside takeTurn()
+    const lastComputerAttack =
+        GAME.playerTwo.attackHistory[GAME.playerTwo.attackHistory.length - 1];
+    if (lastComputerAttack) {
+        const [computerRow, computerCol] = convertToGridCoordinates(lastComputerAttack.coordinates);
+        // Update Player One's board UI for the computer's attack
+        updateCellUI(computerRow, computerCol, playerOneGameboard);
     }
 }
 
