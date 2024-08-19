@@ -24,6 +24,7 @@ export class Player {
         this.lastHit = null; // Track the last successful hit
         this.lastDirection = null; // Track the direction of the last hit
         this.adjacentCells = []; // Track potential adjacent cells to attack
+        this.sunkShips = []
     }
 
     /**
@@ -106,12 +107,18 @@ export class Player {
 
         // If the attack was a hit, track the adjacent cells for future attacks.
         if (validAttack && this.attackHistory[this.attackHistory.length - 1].result) {
-            const previousHit = this.lastHit;
-            this.lastHit = coordinates;
-            this.updateDirection(previousHit, coordinates);
-            this.adjacentCells = this.getAdjacentCells(coordinates).filter(
-                cell => this.isUniqueAttack(cell) && this.isValidDirection(cell)
-            );
+            const ship = opponent.gameboard.getShipAt(coordinates);
+            if (ship.isSunk()) {
+                console.log(ship)
+                this.handleSunkShip(coordinates);
+            } else {
+                const previousHit = this.lastHit;
+                this.lastHit = coordinates;
+                this.updateDirection(previousHit, coordinates);
+                this.adjacentCells = this.getAdjacentCells(coordinates).filter(
+                    cell => this.isUniqueAttack(cell) && this.isValidDirection(cell)
+                );
+            }
         }
 
         return validAttack;
@@ -162,5 +169,34 @@ export class Player {
         if (number < 10) possibleCells.push([letter, number + 1]); // Below
 
         return possibleCells;
+    }
+
+    handleSunkShip(coordinates) {
+        const shipCoordinates = coordinates;
+        console.log(coordinates)
+        this.sunkShips.push(shipCoordinates);
+
+        // Remove surrounding cells of the sunk ship from the adjacentCells list
+        const surroundingCells = this.getSurroundingCells(shipCoordinates);
+        this.adjacentCells = this.adjacentCells.filter(
+            cell =>
+                !surroundingCells.some(surroundingCell => this.arraysEqual(cell, surroundingCell))
+        );
+
+        // Clear last hit and direction because the ship is sunk
+        this.lastHit = null;
+        this.lastDirection = null;
+    }
+
+    getSurroundingCells(shipCoordinates) {
+        const surroundingCells = [];
+        console.log(shipCoordinates)
+
+        for (let coord of shipCoordinates) {
+            const adjacentCells = this.getAdjacentCells([coord]);
+            surroundingCells.push(...adjacentCells);
+        }
+        console.log(surroundingCells)
+        return surroundingCells;
     }
 }
