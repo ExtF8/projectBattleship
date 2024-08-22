@@ -24,7 +24,9 @@ export class Player {
         this.lastHit = null; // Track the last successful hit
         this.lastDirection = null; // Track the direction of the last hit
         this.adjacentCells = []; // Track potential adjacent cells to attack
-        this.sunkShips = []
+        this.sunkShips = [];
+        this.shipHits = []; // Track successful hits on a ship to get surrounding cells after it has been sunk
+        this.noGoZones = new Set(); // Track no-go zones around sunk ships
     }
 
     /**
@@ -84,56 +86,110 @@ export class Player {
     }
 
     /**
-     * Makes computer-controlled attack on an opponent.
+     * Makes a computer-controlled attack on an opponent.
      *
      * @param {Player} opponent - The opponent player.
-     * @returns {Boolean} - Returns true if attack was valid, else false.
+     * @returns {Boolean} - Returns true if the attack was valid, otherwise false.
      */
     computerAttack(opponent) {
         let coordinates;
         let validAttack = false;
+        let attemptedDirections = new Set();
 
         // If there are adjacent cells to attack, prioritize those.
         if (this.adjacentCells.length > 0) {
-            coordinates = this.adjacentCells.shift(); // Get the next adjacent cell
-            validAttack = this.attack(opponent, coordinates);
-        } else {
-            // If no valid attack was made or no adjacent cells to attack, choose random coordinates.
+            while (this.adjacentCells.length > 0) {
+                coordinates = this.adjacentCells.shift();
+                if (!this.isInNoGoZone(coordinates)) {
+                    validAttack = this.attack(opponent, coordinates);
+                }
+
+                if (validAttack) {
+                    if (this.attackHistory[this.attackHistory.length - 1].result) {
+                        if (
+                            this.lastHit &&
+                            !this.shipHits.some(hit => this.arraysEqual(hit, this.lastHit))
+                        ) {
+                            this.shipHits.push(this.lastHit);
+                        }
+
+                        this.updateDirection(this.lastHit, coordinates);
+                        this.lastHit = coordinates;
+                        break;
+                    } else {
+                        if (this.lastHit) {
+                            const direction = this.getDirection(this.lastHit, coordinates);
+                            attemptedDirections.add(direction);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!validAttack) {
             do {
                 coordinates = this.getRandomCoordinates();
-                validAttack = this.attack(opponent, coordinates);
+                if (!this.isInNoGoZone(coordinates)) {
+                    validAttack = this.attack(opponent, coordinates);
+                }
             } while (!validAttack);
         }
 
-        // If the attack was a hit, track the adjacent cells for future attacks.
         if (validAttack && this.attackHistory[this.attackHistory.length - 1].result) {
             const ship = opponent.gameboard.getShipAt(coordinates);
             if (ship.isSunk()) {
-                console.log(ship)
-                this.handleSunkShip(coordinates);
+                this.handleSunkShip([...this.shipHits, this.lastHit]);
+                this.shipHits = [];
+                this.lastHit = null;
             } else {
                 const previousHit = this.lastHit;
                 this.lastHit = coordinates;
+
+                if (!this.shipHits.some(hit => this.arraysEqual(hit, this.lastHit))) {
+                    this.shipHits.push(this.lastHit);
+                }
+
                 this.updateDirection(previousHit, coordinates);
-                this.adjacentCells = this.getAdjacentCells(coordinates).filter(
-                    cell => this.isUniqueAttack(cell) && this.isValidDirection(cell)
-                );
+
+                this.adjacentCells = [
+                    ...this.adjacentCells,
+                    ...this.getAdjacentCells(coordinates).filter(
+                        cell =>
+                            this.isUniqueAttack(cell) &&
+                            !attemptedDirections.has(this.getDirection(coordinates, cell)) &&
+                            !this.isInNoGoZone(cell)
+                    ),
+                ];
             }
+        } else if (!validAttack && this.adjacentCells.length === 0) {
+            this.lastDirection = null;
+            this.adjacentCells = [];
         }
+
+        console.log('last hit: ', this.lastHit);
+        console.log('shipHits: ', this.shipHits); // Now this should be an argument in getSurroundingCells of sunk ship
+        console.log('no go zones: ', this.noGoZones)
+
+        console.log('lastDirection: ', this.lastDirection);
+        console.log('adjacentCells: ', this.adjacentCells);
+        console.log('sunkShips: ', this.sunkShips);
 
         return validAttack;
     }
 
-    updateDirection(previousHit, currentHit) {
-        if (previousHit && currentHit) {
-            const direction = this.getDirection(previousHit, currentHit);
-            if (direction) {
-                this.lastDirection = direction;
-            }
+    getDirection(previousHit, currentHit) {
+        if (!previousHit || !currentHit) {
+            console.error(
+                'Invalid coordinates for direction calculation:',
+                previousHit,
+                currentHit
+            );
+            return null;
         }
-    }
 
-    getDirection([prevLetter, prevNumber], [currLetter, currNumber]) {
+        const [prevLetter, prevNumber] = previousHit;
+        const [currLetter, currNumber] = currentHit;
+
         if (prevLetter === currLetter) {
             return prevNumber < currNumber ? 'down' : 'up';
         } else if (prevNumber === currNumber) {
@@ -142,12 +198,34 @@ export class Player {
         return null;
     }
 
+    updateDirection(previousHit, currentHit) {
+        if (previousHit && currentHit) {
+            const direction = this.getDirection(previousHit, currentHit);
+            if (direction && direction !== this.lastDirection) {
+                console.log(
+                    `Updating direction from ${previousHit} to ${currentHit}: ${direction}`
+                );
+                this.lastDirection = direction;
+            } else if (!direction) {
+                console.log(
+                    `Invalid direction from ${previousHit} to ${currentHit}. Resetting direction.`
+                );
+                this.lastDirection = null;
+            }
+        }
+    }
+
     isValidDirection([letter, number]) {
-        if (!this.lastDirection) return true;
+        if (!this.lastDirection) {
+            console.log(`No direction set, allowing move to ${letter}, ${number}`);
+            return true;
+        }
 
         const [prevLetter, prevNumber] = this.lastHit;
         const direction = this.getDirection([prevLetter, prevNumber], [letter, number]);
-
+        console.log(
+            `Checking direction for ${letter}, ${number}: expected ${this.lastDirection}, got ${direction}`
+        );
         return direction === this.lastDirection;
     }
 
@@ -171,32 +249,70 @@ export class Player {
         return possibleCells;
     }
 
-    handleSunkShip(coordinates) {
-        const shipCoordinates = coordinates;
-        console.log(coordinates)
-        this.sunkShips.push(shipCoordinates);
+    /**
+     * Check if the coordinates are in the no-go zone.
+     *
+     * @param {Array} coordinates - The coordinates to check.
+     * @returns {Boolean} - Returns true if coordinates are in the no-go zone, otherwise false.
+     */
+    isInNoGoZone(coordinates) {
+        // console.log('no go zone: ', coordinates)
+        return this.noGoZones.has(JSON.stringify(coordinates));
+    }
 
-        // Remove surrounding cells of the sunk ship from the adjacentCells list
+    /**
+     * Handle the event when a ship is sunk by marking the surrounding cells as no-go zones.
+     *
+     * @param {Array} shipCoordinates - The coordinates of the sunk ship.
+     */
+    handleSunkShip(shipCoordinates) {
+        this.sunkShips.push([...shipCoordinates]);
+
+        // Mark surrounding cells as no-go zones
         const surroundingCells = this.getSurroundingCells(shipCoordinates);
-        this.adjacentCells = this.adjacentCells.filter(
-            cell =>
-                !surroundingCells.some(surroundingCell => this.arraysEqual(cell, surroundingCell))
-        );
+        surroundingCells.forEach(cell => this.noGoZones.add(JSON.stringify(cell)));
 
-        // Clear last hit and direction because the ship is sunk
         this.lastHit = null;
         this.lastDirection = null;
     }
 
+    /**
+     * Get the surrounding cells of the sunk ship.
+     *
+     * @param {Array} shipCoordinates - The coordinates of the sunk ship.
+     * @returns {Array} - Returns an array of surrounding coordinates.
+     */
     getSurroundingCells(shipCoordinates) {
-        const surroundingCells = [];
-        console.log(shipCoordinates)
+        const surroundingCells = new Set();
+        const letters = 'ABCDEFGHIJ'.split('');
+
+        if (!Array.isArray(shipCoordinates[0])) {
+            shipCoordinates = [shipCoordinates];
+        }
 
         for (let coord of shipCoordinates) {
-            const adjacentCells = this.getAdjacentCells([coord]);
-            surroundingCells.push(...adjacentCells);
+            const [letter, number] = coord;
+            const letterIndex = letters.indexOf(letter);
+
+            const possibleCells = [
+                letterIndex > 0 ? [letters[letterIndex - 1], number] : null,
+                letterIndex < 9 ? [letters[letterIndex + 1], number] : null,
+                number > 1 ? [letter, number - 1] : null,
+                number < 10 ? [letter, number + 1] : null,
+                letterIndex > 0 && number > 1 ? [letters[letterIndex - 1], number - 1] : null,
+                letterIndex > 0 && number < 10 ? [letters[letterIndex - 1], number + 1] : null,
+                letterIndex < 9 && number > 1 ? [letters[letterIndex + 1], number - 1] : null,
+                letterIndex < 9 && number < 10 ? [letters[letterIndex + 1], number + 1] : null,
+            ];
+
+            possibleCells.forEach(cell => {
+                if (cell && !shipCoordinates.some(shipCoord => this.arraysEqual(shipCoord, cell))) {
+                    surroundingCells.add(JSON.stringify(cell));
+                }
+            });
         }
-        console.log(surroundingCells)
-        return surroundingCells;
+
+        console.log('get surrounding Cells: ', surroundingCells)
+        return Array.from(surroundingCells).map(cell => JSON.parse(cell));
     }
 }
