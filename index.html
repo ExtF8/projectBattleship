@@ -1,13 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Battleship</title>
-    <link rel="stylesheet" href="./styles/style.css">
-    <script src="./src/index.js" defer></script>
-</head>
-<body>
-    
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Battleship</title>
+        <link rel="stylesheet" href="./styles/reset.css" />
+        <link rel="stylesheet" href="./styles/style.css" />
+        <script type="module" src="./src/index.js"></script>
+    </head>
+    <body>
+        <header>
+            <h1>Battleship</h1>
+        </header>
+        <div id="content">
+            <div class="button-container">
+                <button id="startGame" class="game-button">Start Game</button>
+                <button id="randomPlacement" class="game-button">Randomize Ships</button>
+            </div>
+            <div class="battlefields-container">
+                <div class="battlefield battlefield-playerOne">
+                    <h2 class="player">Player One</h2>
+                    <div class="gameboard-container">
+                        <div class="stats" id="playerOneStats">
+                            <div class="game-progress">
+                                <ol class="progress">
+                                    <li class="stat">
+                                        <p>Hits:</p>
+                                        <p class="hits" id="playerOneHits">0</p>
+                                    </li>
+                                    <li class="stat">
+                                        <p>Misses:</p>
+                                        <p class="misses" id="playerOneMisses">0</p>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="ship-types">
+                                <ol class="ships" id="playerOneShips">
+                                    <li class="ship">
+                                        <p class="ship-title">Carrier</p>
+                                        <ul class="ship-size">
+                                            <li class="ship-block ship-block-default"></li>
+                                            <li class="ship-block ship-block-default"></li>
+                                            <li class="ship-block ship-block-default"></li>
+                                            <li class="ship-block ship-block-default"></li>
+                                            <li class="ship-block ship-block-default"></li>
+                                        </ul>
+                                    </li>
+                                    <li class="ship">
+                                        <p class="ship-title">Battleship</p>
+                                        <ul class="ship-size">
+                                            <li class="ship-block ship-block-default"></li>
+                                            <li class="ship-block ship-block-default"></li>
+                                            <li class="ship-block ship-block-default"></li>
+                                            <li class="ship-block ship-block-default"></li>
+                                        </ul>
+                                    </li>
+                                    <li class="ship">
+                                        <p class="ship-title">Destroyer</p>
+                                        <ul class="ship-size">
+                                            <li class="ship-block ship-block-default"></li>
+                                            <li class="ship-block ship-block-default"></li>
+                                            <li class="ship-block ship-block-default"></li>
+                                        </ul>
+                                    </li>
+                                    <li class="ship">
+                                        <p class="ship-title">Submarine</p>
+                                        <ul class="ship-size">
+                                            <li class="ship-block ship-block-default"></li>
+                                            <li class="ship-block ship-block-default"></li>
+                                            <li class="ship-block ship-block-default"></li>
+                                        </ul>
+                                    </li>
+                                    <li class="ship">
+                                        <p class="ship-title">Patrol Boat</p>
+                                        <ul class="ship-size">
+                                            <li class="ship-block ship-block-default"></li>
+                                            <li class="ship-block ship-block-default"></li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="gameboard gameboard-playerOne" id="playerOneGameboard">
+                        </div>
+                    </div>
+                </div>
+                <div class="battlefield battlefield-playerTwo">
+                    <h2 class="player playerTwo">Player Two</h2>
+                    <div class="gameboard-container gameboard-container-playerTwo">
+                        <div class="stats" id="playerTwoStats">
+                            <div class="game-progress">
+                                <ol class="progress">
+                                    <li class="stat">
+                                        <p>Hits:</p>
+                                        <p class="hits" id="playerTwoHits">0</p>
+                                    </li>
+                                    <li class="stat">
+                                        <p>Misses:</p>
+                                        <p class="misses" id="playerTwoMisses">0</p>
+                                    </li>
+                                </ol>
+                                <div class="ship-types">
+                                    <ol class="ships" id="playerTwoShips">
+                                        <li class="ship">
+                                            <p class="ship-title">Carrier</p>
+                                            <ul class="ship-size">
+                                                <li class="ship-block ship-block-default"></li>
+                                                <li class="ship-block ship-block-default"></li>
+                                                <li class="ship-block ship-block-default"></li>
+                                                <li class="ship-block ship-block-default"></li>
+                                                <li class="ship-block ship-block-default"></li>
+                                            </ul>
+                                        </li>
+                                        <li class="ship">
+                                            <p class="ship-title">Battleship</p>
+                                            <ul class="ship-size">
+                                                <li class="ship-block ship-block-default"></li>
+                                                <li class="ship-block ship-block-default"></li>
+                                                <li class="ship-block ship-block-default"></li>
+                                                <li class="ship-block ship-block-default"></li>
+                                            </ul>
+                                        </li>
+                                        <li class="ship">
+                                            <p class="ship-title">Destroyer</p>
+                                            <ul class="ship-size">
+                                                <li class="ship-block ship-block-default"></li>
+                                                <li class="ship-block ship-block-default"></li>
+                                                <li class="ship-block ship-block-default"></li>
+                                            </ul>
+                                        </li>
+                                        <li class="ship">
+                                            <p class="ship-title">Submarine</p>
+                                            <ul class="ship-size">
+                                                <li class="ship-block ship-block-default"></li>
+                                                <li class="ship-block ship-block-default"></li>
+                                                <li class="ship-block ship-block-default"></li>
+                                            </ul>
+                                        </li>
+                                        <li class="ship">
+                                            <p class="ship-title">Patrol Boat</p>
+                                            <ul class="ship-size">
+                                                <li class="ship-block ship-block-default"></li>
+                                                <li class="ship-block ship-block-default"></li>
+                                            </ul>
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gameboard gameboard-playerTwo" id="playerTwoGameboard">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+            <div class="footer_container">
+                <ul class="footer_ul">
+                    <li class="footer_li">
+                        <a href="https://github.com/ExtF8" target="_blank" class="footer_link"
+                            >Who Made This Web Page</a
+                        >
+                    </li>
+                    <li class="footer_li">
+                        <a
+                            href="https://www.theodinproject.com/lessons/node-path-javascript-weather-app"
+                            target="_blank"
+                            class="footer_link"
+                            >And Why</a
+                        >
+                    </li>
+                    <li class="footer_li">
+                        <a href="#" target="_top" class="footer_link"
+                            >Three looks better than two</a
+                        >
+                    </li>
+                </ul>
+                <span class="footer_copyright">© 2024 Copyright</span>
+            </div>
+        </footer>
+    </body>
 </html>

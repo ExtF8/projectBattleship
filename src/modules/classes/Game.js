@@ -1,22 +1,24 @@
-import { Player } from './Player';
-import { Ship, ShipManager } from './Ship';
+import { Player } from './Player.js';
+import { Ship, ShipManager } from './Ship.js';
 
 /**
  * Represents a game of Battleship.
  *
  * @class
  */
-export class Game {
+export default class Game {
     /**
      * Creates an instance of Game.
      *
      */
     constructor() {
-        this.startGame = false;
+        this.hasGameStarted = false;
+        this.isGameOver = false;
         this.playerOne = null;
         this.playerTwo = null;
         this.currentTurn = null;
-        this.isGameOver = false;
+        this.playerOneShips = [];
+        this.playerTwoShips = [];
         this.shipManager = new ShipManager();
         Ship.defaultShipManager = this.shipManager;
     }
@@ -26,12 +28,16 @@ export class Game {
      */
     initializeGame() {
         this.resetGame();
-        this.startGame = true;
+        this.hasGameStarted = false;
 
         this.playerOne = new Player(1, 'Human', false);
         this.playerTwo = new Player(2, 'Computer', true);
         this.initShips();
         this.currentTurn = this.playerOne;
+    }
+
+    startGame() {
+        this.hasGameStarted = true;
     }
 
     /**
@@ -104,22 +110,53 @@ export class Game {
         if (this.isGameOver) {
             throw new Error('Game is over');
         }
-        // Define attacking and defending player
+
         const attackingPlayer = this.currentTurn;
         const defendingPlayer = this.getOpponent();
 
-        // Place an attack
-        const attackResult = attackingPlayer.attack(defendingPlayer, coordinates);
+        let attackResult;
 
-        // Check for win
+        // Check if it's player one's turn (human)
+        if (attackingPlayer === this.playerOne) {
+            attackResult = attackingPlayer.attack(defendingPlayer, coordinates);
+            // Check for win condition after player's attack
+            if (attackResult) {
+                this.checkForWin(defendingPlayer);
+            }
+
+            // Switch to computer's turn if the game is not over
+            if (!this.isGameOver) {
+                this.switchTurn();
+                this.takeComputerTurn(); // Trigger computer's turn immediately
+            }
+        } else {
+            // It's player two's turn (computer)
+            attackResult = this.takeComputerTurn();
+        }
+
+        return attackResult;
+    }
+
+    /**
+     * Handles the computer's turn.
+     *
+     */
+    takeComputerTurn() {
+        const attackingPlayer = this.playerTwo;
+        const defendingPlayer = this.playerOne;
+
+        const attackResult = attackingPlayer.computerAttack(defendingPlayer);
+
+        // Check for win condition after computer's attack
         if (attackResult) {
             this.checkForWin(defendingPlayer);
         }
 
-        // Switch turn
-        this.switchTurn();
+        // Switch back to player's turn if the game is not over
+        if (!this.isGameOver) {
+            this.switchTurn();
+        }
 
-        // Return attackResult
         return attackResult;
     }
 
@@ -167,7 +204,7 @@ export class Game {
      * Resets game to its initial state.
      */
     resetGame() {
-        this.startGame = false;
+        this.hasGameStarted = false;
         this.isGameOver = false;
         this.playerOne = null;
         this.playerTwo = null;
