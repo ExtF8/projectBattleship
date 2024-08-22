@@ -1,6 +1,6 @@
-import { Ship } from '../src/modules/classes/Ship';
-import { Game } from '../src/modules/classes/Game';
-import { logGrid } from '../src/utility/logHelper';
+import { Ship } from '../src/modules/classes/Ship.js';
+import Game from '../src/modules/classes/Game.js';
+import { logGrid } from '../src/utility/logHelper.js';
 
 // This test suite tests game flow
 describe('Game flow logic', () => {
@@ -41,9 +41,9 @@ describe('Game flow logic', () => {
             console.log('Game has been reset');
         } else {
             console.log('Player One');
-            logGrid(game.playerOne.gameboard);
+            logGrid(playerOne.gameboard);
             console.log('Player Two');
-            logGrid(game.playerTwo.gameboard);
+            logGrid(playerTwo.gameboard);
         }
     });
 
@@ -66,80 +66,49 @@ describe('Game flow logic', () => {
 
         expect(attackResult).toBe(true);
         expect(game.playerTwo.gameboard.getShipAt(['J', 1]).isSunk()).toBe(false);
+
+        // After human attack, computer's turn should happen automatically
+        expect(game.currentTurn).toBe(game.playerOne); // Should switch back to player's turn
     });
 
-    test('should switch turns after each attacks', () => {
-        // Computer turn
-        game.takeTurn(['A', 1]);
-        // Next turn from Human
-        expect(game.currentTurn).toBe(game.playerOne);
+    test('should switch turns after each attack', () => {
+        // Human's turn
+        game.takeTurn(['J', 2]); // Human attacks
+        expect(game.currentTurn).toBe(game.playerOne); // After computer's automatic turn, it's human's turn again
 
-        // Human turn
-        game.takeTurn(['J', 2]);
-        // Next turn from Computer
-        expect(game.currentTurn).toBe(game.playerTwo);
+        // Human's next turn
+        game.takeTurn(['J', 3]); // Human attacks
+        expect(game.currentTurn).toBe(game.playerOne); // After computer's automatic turn, it's human's turn again
     });
 
     test('should throw an error if attacking after game is over', () => {
         // Sink all playerTwo ships to end the game
-
-        // // Computer turn
-        game.takeTurn(['A', 2]);
-        // // Human turn
+        game.takeTurn(['J', 1]);
+        game.takeTurn(['J', 2]);
         game.takeTurn(['J', 3]);
-
-        game.takeTurn(['A', 3]);
         game.takeTurn(['J', 4]);
-
-        game.takeTurn(['A', 4]);
         game.takeTurn(['J', 5]);
-
-        game.takeTurn(['A', 5]);
         game.takeTurn(['I', 2]);
-
-        game.takeTurn(['B', 2]);
         game.takeTurn(['I', 3]);
-
-        game.takeTurn(['B', 3]);
         game.takeTurn(['I', 4]);
-
-        game.takeTurn(['B', 4]);
         game.takeTurn(['I', 5]);
-
-        game.takeTurn(['B', 5]);
         game.takeTurn(['H', 3]);
-
-        game.takeTurn(['C', 3]);
         game.takeTurn(['H', 4]);
-
-        game.takeTurn(['C', 4]);
         game.takeTurn(['H', 5]);
-
-        game.takeTurn(['C', 5]);
         game.takeTurn(['G', 4]);
-
-        game.takeTurn(['D', 4]);
         game.takeTurn(['G', 5]);
-
-        game.takeTurn(['D', 5]);
         game.takeTurn(['G', 6]);
-
-        game.takeTurn(['D', 6]);
         game.takeTurn(['F', 5]);
-
-        game.takeTurn(['E', 5]);
-        game.takeTurn(['F', 4]);
-
-        game.takeTurn(['E', 6]); // This should sink the last ship of playerOne
+        game.takeTurn(['F', 6]); // This should sink the last ship of playerTwo
 
         expect(game.isGameOver).toBe(true);
-        expect(() => game.takeTurn(['F', 5])).toThrow('Game is over');
+        expect(() => game.takeTurn(['A', 1])).toThrow('Game is over'); // Should throw an error since the game is over
 
         // For visual board check
         console.log('Player One');
-        logGrid(game.playerOne.gameboard);
+        logGrid(playerOne.gameboard);
         console.log('Player Two');
-        logGrid(game.playerTwo.gameboard);
+        logGrid(playerTwo.gameboard);
     });
 
     test('should declare winner after game has ended ', () => {
@@ -154,6 +123,7 @@ describe('Game flow logic', () => {
         expect(game.isGameOver).toBe(false);
 
         // New game after reset
-        expect(newGame.startGame).toBe(true);
+        newGame.startGame();
+        expect(newGame.hasGameStarted).toBe(true);
     });
 });
