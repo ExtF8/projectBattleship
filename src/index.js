@@ -2,6 +2,8 @@ import Game from './modules/classes/Game.js';
 import { Gameboard } from './modules/classes/Gameboard.js';
 import { Ship } from './modules/classes/Ship.js';
 
+import addGridLabels from './modules/dom/domHelper.js';
+
 const startGameButton = document.getElementById('startGame');
 const randomizeShips = document.getElementById('randomPlacement');
 const playerOneGameboard = document.getElementById('playerOneGameboard');
@@ -50,7 +52,27 @@ randomizeShips.addEventListener('click', displayPlacedRandomShips);
 function renderGameboard(grid, gridElement) {
     gridElement.innerHTML = ''; // Clear any existing content
 
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''); // For column labels
+    const gridSize = grid.length;
+
+    // Create the top row with letters
+    for (let i = 0; i <= gridSize; i++) {
+        const labelElement = document.createElement('div');
+        labelElement.classList.add('label');
+        if (i > 0) {
+            labelElement.textContent = letters[i - 1];
+        }
+        gridElement.appendChild(labelElement);
+    }
+
+    // Create the grid cells with row numbers on the left
     grid.forEach((row, rowIndex) => {
+        // Add the number label for the row
+        const numberLabel = document.createElement('div');
+        numberLabel.classList.add('label');
+        numberLabel.textContent = rowIndex + 1;
+        gridElement.appendChild(numberLabel);
+
         row.forEach((cell, colIndex) => {
             const cellElement = document.createElement('div');
             cellElement.classList.add('cell');
@@ -73,6 +95,7 @@ function renderGameboard(grid, gridElement) {
         });
     });
 }
+
 
 function manageCellEvents(enable) {
     const cells = playerTwoGameboard.querySelectorAll('.cell');
