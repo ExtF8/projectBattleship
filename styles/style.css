@@ -178,14 +178,21 @@ header {
 }
 
 #playerOneGameboard,
-#playerTwoGameboard{
+#playerTwoGameboard {
     display: grid;
     grid-template-columns: repeat(11, 1fr);
     gap: 3px;
 }
 
-
-
+.label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border: none;
+    height: 40px;
+    width: 40px;
+}
 
 .cell {
     width: 50px;
@@ -203,16 +210,6 @@ header {
 
 .waitTurn {
     border: 1px solid gray;
-}
-
-.label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    border: none;
-    height: 40px;
-    width: 40px;
 }
 
 .cell-PlayerTwo:not(.marked):hover {

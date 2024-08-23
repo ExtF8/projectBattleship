@@ -241,8 +241,11 @@ function updatePlayerShipsStats(player, row, col, shipElementId) {
 
 function togglePlayerTurnState(gridElement, isWaiting) {
     const cells = [...gridElement.childNodes];
+
     cells.forEach(cell => {
-        cell.classList.toggle('waitTurn', isWaiting);
+        if (cell.classList.contains('cell')) {
+            cell.classList.toggle('waitTurn', isWaiting);
+        }
     });
 }
 
