@@ -96,13 +96,14 @@ function renderGameboard(grid, gridElement) {
     });
 }
 
-
 function manageCellEvents(enable) {
     const cells = playerTwoGameboard.querySelectorAll('.cell');
     cells.forEach(cell => {
         if (enable) {
+            console.log('add');
             cell.addEventListener('click', cellClickHandler);
         } else {
+            console.log('remove');
             cell.removeEventListener('click', cellClickHandler);
         }
     });
@@ -113,10 +114,12 @@ function cellClickHandler(event) {
     const row = parseInt(cell.dataset.row, 10);
     const col = parseInt(cell.dataset.col, 10);
 
-    handleAttack(row, col, playerTwoGameboard);
+    // Ensure that the cell is only clickable once per turn
+    if (cell.classList.contains('marked')) {
+        return;
+    }
 
-    // Prevent repeated clicks on the same cell by removing the event listener
-    cell.removeEventListener('click', cellClickHandler);
+    handleAttack(row, col, playerTwoGameboard);
 }
 
 function handleAttack(row, col, gridElement) {
@@ -160,6 +163,7 @@ function updateCellUI(row, col, gridElement) {
     const cellSelector = `.cell[data-row="${row}"][data-col="${col}"]`;
     const cellElement = gridElement.querySelector(cellSelector);
 
+    // Mark the cell as clicked
     cellElement.classList.add('marked');
 
     const grid =
