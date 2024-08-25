@@ -191,10 +191,10 @@ function renderGameboard(grid, gridElement) {
                 cellElement.classList.add('ship-cell');
             }
 
-            // if (gridElement.id === 'playerTwoGameboard') {
-            //     cellElement.classList.add('cell-PlayerTwo');
-            //     cellElement.classList.remove('ship-cell');
-            // }
+            if (gridElement.id === 'playerTwoGameboard') {
+                    cellElement.classList.add('cell-PlayerTwo');
+                    cellElement.classList.remove('ship-cell');
+             }
 
             gridElement.appendChild(cellElement);
         });
