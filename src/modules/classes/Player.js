@@ -166,13 +166,13 @@ export class Player {
             this.adjacentCells = [];
         }
 
-        console.log('last hit: ', this.lastHit);
-        console.log('shipHits: ', this.shipHits); // Now this should be an argument in getSurroundingCells of sunk ship
-        console.log('no go zones: ', this.noGoZones)
+        // console.log('last hit: ', this.lastHit);
+        // console.log('shipHits: ', this.shipHits); // Now this should be an argument in getSurroundingCells of sunk ship
+        // console.log('no go zones: ', this.noGoZones);
 
-        console.log('lastDirection: ', this.lastDirection);
-        console.log('adjacentCells: ', this.adjacentCells);
-        console.log('sunkShips: ', this.sunkShips);
+        // console.log('lastDirection: ', this.lastDirection);
+        // console.log('adjacentCells: ', this.adjacentCells);
+        // console.log('sunkShips: ', this.sunkShips);
 
         return validAttack;
     }
@@ -202,14 +202,14 @@ export class Player {
         if (previousHit && currentHit) {
             const direction = this.getDirection(previousHit, currentHit);
             if (direction && direction !== this.lastDirection) {
-                console.log(
-                    `Updating direction from ${previousHit} to ${currentHit}: ${direction}`
-                );
+                // console.log(
+                //     `Updating direction from ${previousHit} to ${currentHit}: ${direction}`
+                // );
                 this.lastDirection = direction;
             } else if (!direction) {
-                console.log(
-                    `Invalid direction from ${previousHit} to ${currentHit}. Resetting direction.`
-                );
+                // console.log(
+                //     `Invalid direction from ${previousHit} to ${currentHit}. Resetting direction.`
+                // );
                 this.lastDirection = null;
             }
         }
@@ -217,15 +217,15 @@ export class Player {
 
     isValidDirection([letter, number]) {
         if (!this.lastDirection) {
-            console.log(`No direction set, allowing move to ${letter}, ${number}`);
+            // console.log(`No direction set, allowing move to ${letter}, ${number}`);
             return true;
         }
 
         const [prevLetter, prevNumber] = this.lastHit;
         const direction = this.getDirection([prevLetter, prevNumber], [letter, number]);
-        console.log(
-            `Checking direction for ${letter}, ${number}: expected ${this.lastDirection}, got ${direction}`
-        );
+        // console.log(
+        //     `Checking direction for ${letter}, ${number}: expected ${this.lastDirection}, got ${direction}`
+        // );
         return direction === this.lastDirection;
     }
 
@@ -312,7 +312,16 @@ export class Player {
             });
         }
 
-        console.log('get surrounding Cells: ', surroundingCells)
+        // console.log('get surrounding Cells: ', surroundingCells);
         return Array.from(surroundingCells).map(cell => JSON.parse(cell));
+    }
+
+    /**
+     * Resets players hits and misses to zero.
+     *
+     */
+    resetScore() {
+        this.hits = 0;
+        this.misses = 0;
     }
 }
