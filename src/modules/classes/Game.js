@@ -19,6 +19,8 @@ export default class Game {
         this.currentTurn = null;
         this.playerOneShips = [];
         this.playerTwoShips = [];
+        this.hasWinner = false;
+        this.winner = '';
         this.shipManager = new ShipManager();
         Ship.defaultShipManager = this.shipManager;
     }
@@ -27,7 +29,7 @@ export default class Game {
      * Initializes the game by creating players, ships, and setting the starting turn.
      */
     initializeGame() {
-        this.resetGame();
+        // this.resetGame();
         this.hasGameStarted = false;
 
         this.playerOne = new Player(1, 'Human', false);
@@ -38,6 +40,11 @@ export default class Game {
 
     startGame() {
         this.hasGameStarted = true;
+    }
+
+    endGame() {
+        this.hasGameStarted = false;
+        // this.resetGame();
     }
 
     /**
@@ -108,7 +115,7 @@ export default class Game {
      */
     takeTurn(coordinates) {
         if (this.isGameOver) {
-            throw new Error('Game is over');
+            return;
         }
 
         const attackingPlayer = this.currentTurn;
@@ -177,7 +184,9 @@ export default class Game {
     checkForWin(defendingPlayer) {
         if (defendingPlayer.gameboard.allShipsSunk()) {
             this.isGameOver = true;
+
             this.declareWinner(defendingPlayer);
+            this.endGame()
         }
     }
 
@@ -188,9 +197,10 @@ export default class Game {
      * @returns {string} The name of the winning player ('Player One' or 'Player Two').
      */
     declareWinner(defendingPlayer) {
-        const winner = defendingPlayer === this.playerOne ? 'Player Two' : 'Player One';
-        console.log(`${winner} wins!`);
-        return winner;
+        this.hasWinner = true;
+        this.winner = defendingPlayer === this.playerOne ? 'Player Two' : 'Player One';
+        // console.log(`${winner} wins!`);
+        return this.winner;
     }
 
     /**
@@ -206,9 +216,12 @@ export default class Game {
     resetGame() {
         this.hasGameStarted = false;
         this.isGameOver = false;
+        if (this.playerOne) this.playerOne.resetScore();
+        if (this.playerTwo) this.playerTwo.resetScore();
+        this.currentTurn = null;
+        this.winner = '';
+        this.shipManager.clearShips();
         this.playerOne = null;
         this.playerTwo = null;
-        this.currentTurn = null;
-        this.shipManager.clearShips();
     }
 }
