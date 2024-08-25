@@ -4,36 +4,141 @@ import { Ship } from './modules/classes/Ship.js';
 
 import addGridLabels from './modules/dom/domHelper.js';
 
-const startGameButton = document.getElementById('startGame');
+const gameStateButton = document.getElementById('gameStateToggle');
 const randomizeShips = document.getElementById('randomPlacement');
 const playerOneGameboard = document.getElementById('playerOneGameboard');
 const playerTwoGameboard = document.getElementById('playerTwoGameboard');
 
-const GAME = new Game();
-GAME.initializeGame();
+let GAME;
 
-GAME.playerOne.gameboard.placeShipsRandomly(GAME.playerOneShips);
-GAME.playerTwo.gameboard.placeShipsRandomly(GAME.playerTwoShips);
+function initGame() {
+    GAME = new Game();
+    GAME.initializeGame();
 
-renderGameboard(GAME.playerOne.gameboard.grid, playerOneGameboard);
-renderGameboard(GAME.playerTwo.gameboard.grid, playerTwoGameboard);
+    GAME.playerOne.gameboard.placeShipsRandomly(GAME.playerOneShips);
+    GAME.playerTwo.gameboard.placeShipsRandomly(GAME.playerTwoShips);
 
-function startGame() {
-    console.log('start game clicked');
+    renderGameboard(GAME.playerOne.gameboard.grid, playerOneGameboard);
+    renderGameboard(GAME.playerTwo.gameboard.grid, playerTwoGameboard);
 
-    GAME.startGame();
+    // Initialize Game Button State
+    updateButtonLabel();
 
-    if (GAME.hasGameStarted) {
-        startGameButton.innerText = 'End Game';
-    } else {
-        startGameButton.innerText = 'Start New Game';
-    }
-
-    randomizeShips.removeEventListener('click', displayPlacedRandomShips);
-    manageCellEvents(true); // Allow clicks only on Player Two's board
+    return GAME;
 }
 
-startGameButton.addEventListener('click', startGame);
+initGame();
+
+function toggleGameState() {
+    if (GAME.hasGameStarted) {
+        quitGame(); // If the game has already started, quit it
+    } else {
+        startGame(); // Otherwise, start a new game
+    }
+}
+
+// Function to start the game
+function startGame() {
+    if (GAME.isGameOver) {
+        endCurrentGame();
+    }
+
+    console.log('Starting game...');
+    GAME.startGame();
+
+    // Enable clicks only on Player Two's board
+    manageCellEvents(true);
+
+    // Disable ship randomization when the game is in progress
+    randomizeShips.removeEventListener('click', displayPlacedRandomShips);
+
+    updateButtonLabel();
+}
+
+function areYouSureToQuitGame() {
+    // Show confirmation dialog
+    const confirmEndGame = window.confirm(
+        `This will reset all progress.\nAre you sure you want to end the game?`
+    );
+
+    return confirmEndGame;
+}
+
+// Function to end the game
+function quitGame() {
+    // If player cancels the confirmation, return early and do nothing
+    if (!areYouSureToQuitGame()) {
+        return;
+    }
+
+    endCurrentGame();
+
+    // updateButtonLabel();
+}
+
+function endCurrentGame() {
+    console.log('Ending game...');
+    GAME.endGame();
+
+    // Disable cell clicks as the game is no longer active
+    manageCellEvents(false);
+
+    displayPlacedRandomShips();
+    updateButtonLabel();
+    GAME.resetGame();
+
+    initGame();
+
+    // Re-enable the random ship placement button
+    randomizeShips.addEventListener('click', displayPlacedRandomShips);
+
+    // Reset the game board visually if you want to clear hits, misses, etc.
+    resetGameboardVisuals(playerOneGameboard, 'playerOneShips');
+    resetGameboardVisuals(playerTwoGameboard, 'playerTwoShips');
+}
+
+// Function to update the game button label based on game state
+function updateButtonLabel() {
+    console.log('updateButtonLabel');
+    if (GAME.hasGameStarted) {
+        gameStateButton.textContent = 'End Game';
+    } else {
+        gameStateButton.textContent = 'Start New Game';
+    }
+}
+
+// Function to reset gameboard visuals
+function resetGameboardVisuals(gridElement, shipElementId) {
+    const playerShips = document.getElementById(shipElementId);
+    const cells = gridElement.querySelectorAll('.cell');
+    const shipElements = playerShips.querySelectorAll('.ship');
+
+    cells.forEach(cell => {
+        cell.classList.remove('marked', 'cell-hit', 'cell-miss', 'waitTurn');
+    });
+
+    shipElements.forEach(shipElement => {
+        const shipBlocks = shipElement.querySelectorAll('.ship-block');
+        const shipTitle = shipElement.querySelector('.ship-title');
+
+        shipBlocks.forEach(block => {
+            block.classList.remove('ship-block-hit');
+            block.classList.add('ship-block-default');
+        });
+
+        shipTitle.classList.remove('ship-title-after-sunk');
+    });
+
+    resetHitsAndMisses();
+    resetWinner();
+}
+
+function resetHitsAndMisses() {
+    updatePlayerOneScore();
+    updatePlayerTwoScore();
+}
+
+gameStateButton.addEventListener('click', toggleGameState);
 
 function displayPlacedRandomShips() {
     GAME.playerOne.gameboard.clearShips();
@@ -86,10 +191,10 @@ function renderGameboard(grid, gridElement) {
                 cellElement.classList.add('ship-cell');
             }
 
-            if (gridElement.id === 'playerTwoGameboard') {
-                cellElement.classList.add('cell-PlayerTwo');
-                cellElement.classList.remove('ship-cell');
-            }
+            // if (gridElement.id === 'playerTwoGameboard') {
+            //     cellElement.classList.add('cell-PlayerTwo');
+            //     cellElement.classList.remove('ship-cell');
+            // }
 
             gridElement.appendChild(cellElement);
         });
@@ -100,10 +205,8 @@ function manageCellEvents(enable) {
     const cells = playerTwoGameboard.querySelectorAll('.cell');
     cells.forEach(cell => {
         if (enable) {
-            console.log('add');
             cell.addEventListener('click', cellClickHandler);
         } else {
-            console.log('remove');
             cell.removeEventListener('click', cellClickHandler);
         }
     });
@@ -115,7 +218,7 @@ function cellClickHandler(event) {
     const col = parseInt(cell.dataset.col, 10);
 
     // Ensure that the cell is only clickable once per turn
-    if (cell.classList.contains('marked')) {
+    if (cell.classList.contains('marked') || GAME.isGameOver) {
         return;
     }
 
@@ -123,30 +226,70 @@ function cellClickHandler(event) {
 }
 
 function handleAttack(row, col, gridElement) {
+    if (GAME.isGameOver) {
+        console.log('isGameOver: ', GAME.isGameOver);
+
+
+        return;
+    }
     const [x, y] = convertCoordinates(row, col);
 
-    if (gridElement.id === 'playerTwoGameboard') {
-        GAME.takeTurn([x, y]);
+    GAME.takeTurn([x, y]);
 
-        updateCellUI(row, col, gridElement);
-        updatePlayerOneScore();
-        updatePlayerTwoShipsStats(row, col);
+    updateCellUI(row, col, gridElement);
+    updatePlayerOneScore();
+    updatePlayerTwoShipsStats(row, col);
+
+    manageCellEvents(false);
+
+    togglePlayerTurnState(gridElement, true);
+    setTimeout(() => {
+        handleComputerAttack(gridElement);
+
+        setTimeout(() => {
+            updatePlayerTwoScore();
+        }, 100);
+    }, 1000);
+
+    console.log(GAME.isGameOver);
+    console.log(GAME.winner);
+    checkForWin();
+}
+
+function checkForWin() {
+    if (GAME.isGameOver) {
+        console.log('Current game has ended');
+        displayWinner();
+        updateButtonLabel();
 
         manageCellEvents(false);
-
-        togglePlayerTurnState(gridElement, true);
-        setTimeout(() => {
-            handleComputerAttack();
-
-            setTimeout(() => {
-                updatePlayerTwoScore();
-                togglePlayerTurnState(gridElement, false);
-            }, 100);
-        }, 1000);
     }
 }
 
-function handleComputerAttack() {
+function displayWinner() {
+    const winner = document.getElementById('winner');
+    // console.log('display  winner:', GAME.winner);
+    if (GAME.hasWinner) {
+        winner.innerText = `${GAME.winner} Wins`;
+    }
+}
+
+function resetWinner() {
+    const winner = document.getElementById('winner');
+    console.log('display  winner:', GAME.winner);
+    if (!GAME.hasWinner) {
+        winner.textContent = '';
+    }
+}
+
+function handleComputerAttack(gridElement) {
+    
+    if (GAME.isGameOver) {
+        console.log('isGameOver: ', GAME.isGameOver);
+        togglePlayerTurnState(gridElement, false);
+        return;
+    }
+    togglePlayerTurnState(gridElement, false);
     // Handle the computer's turn, which happens inside takeTurn()
     const lastComputerAttack =
         GAME.playerTwo.attackHistory[GAME.playerTwo.attackHistory.length - 1];
@@ -244,6 +387,7 @@ function togglePlayerTurnState(gridElement, isWaiting) {
 
     cells.forEach(cell => {
         if (cell.classList.contains('cell')) {
+            console.log('player turn state: ', isWaiting);
             cell.classList.toggle('waitTurn', isWaiting);
         }
     });
