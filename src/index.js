@@ -226,14 +226,7 @@ function cellClickHandler(event) {
 }
 
 function handleAttack(row, col, gridElement) {
-    if (GAME.isGameOver) {
-        console.log('isGameOver: ', GAME.isGameOver);
-
-
-        return;
-    }
     const [x, y] = convertCoordinates(row, col);
-
     GAME.takeTurn([x, y]);
 
     updateCellUI(row, col, gridElement);
@@ -250,25 +243,27 @@ function handleAttack(row, col, gridElement) {
             updatePlayerTwoScore();
         }, 100);
     }, 1000);
-
-    console.log(GAME.isGameOver);
-    console.log(GAME.winner);
-    checkForWin();
 }
 
 function checkForWin() {
     if (GAME.isGameOver) {
         console.log('Current game has ended');
-        displayWinner();
-        updateButtonLabel();
+        updateWinner();
 
-        manageCellEvents(false);
+        return true;
     }
+    return false;
+}
+
+function updateWinner() {
+    displayWinner();
+    updateButtonLabel();
+
+    manageCellEvents(false);
 }
 
 function displayWinner() {
     const winner = document.getElementById('winner');
-    // console.log('display  winner:', GAME.winner);
     if (GAME.hasWinner) {
         winner.innerText = `${GAME.winner} Wins`;
     }
@@ -276,28 +271,25 @@ function displayWinner() {
 
 function resetWinner() {
     const winner = document.getElementById('winner');
-    console.log('display  winner:', GAME.winner);
+
     if (!GAME.hasWinner) {
         winner.textContent = '';
     }
 }
 
 function handleComputerAttack(gridElement) {
-    
-    if (GAME.isGameOver) {
-        console.log('isGameOver: ', GAME.isGameOver);
-        togglePlayerTurnState(gridElement, false);
-        return;
-    }
     togglePlayerTurnState(gridElement, false);
     // Handle the computer's turn, which happens inside takeTurn()
-    const lastComputerAttack =
-        GAME.playerTwo.attackHistory[GAME.playerTwo.attackHistory.length - 1];
+    const lastComputerAttack = GAME.playerTwo.attackHistory.slice(-1)[0]; // Get last attack result
+    console.log(lastComputerAttack);
     if (lastComputerAttack) {
         const [computerRow, computerCol] = convertToGridCoordinates(lastComputerAttack.coordinates);
         updatePlayerOneShipsStats(computerRow, computerCol);
         // Update Player One's board UI for the computer's attack
         updateCellUI(computerRow, computerCol, playerOneGameboard);
+        if (checkForWin()) {
+            return;
+        }
     }
     manageCellEvents(true);
 }
