@@ -42,7 +42,7 @@ header {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    padding-top: 5vw;
+    padding-top: 1vw;
     background-color: var(--medium);
 }
 
@@ -182,6 +182,14 @@ header {
     display: grid;
     grid-template-columns: repeat(11, 1fr);
     gap: 3px;
+}
+
+.winner {
+    font-size: 48px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .label {
