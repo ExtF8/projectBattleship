@@ -99,7 +99,6 @@ function endCurrentGame() {
 
 // Function to update the game button label based on game state
 function updateButtonLabel() {
-    console.log('updateButtonLabel');
     if (GAME.hasGameStarted) {
         gameStateButton.textContent = 'End Game';
     } else {
@@ -235,19 +234,42 @@ function handleAttack(row, col, gridElement) {
 
     manageCellEvents(false);
 
+    // Check if the game is over after the player one attack
+    if (GAME.currentTurn === GAME.playerOne) {
+        if (checkForWin()) {
+            return;
+        }
+    }
+
     togglePlayerTurnState(gridElement, true);
+
     setTimeout(() => {
         handleComputerAttack(gridElement);
-
-        setTimeout(() => {
-            updatePlayerTwoScore();
-        }, 100);
     }, 1000);
+}
+
+function handleComputerAttack(gridElement) {
+    togglePlayerTurnState(gridElement, false);
+    // Handle the computer's turn, which happens inside takeTurn()
+    const lastComputerAttack = GAME.playerTwo.attackHistory.slice(-1)[0]; // Get last attack result
+
+    if (lastComputerAttack) {
+        const [computerRow, computerCol] = convertToGridCoordinates(lastComputerAttack.coordinates);
+        updatePlayerOneShipsStats(computerRow, computerCol);
+        // Update Player One's board UI after the computer's attack
+        updateCellUI(computerRow, computerCol, playerOneGameboard);
+        updatePlayerTwoScore();
+    }
+
+    if (checkForWin()) {
+        return;
+    }
+
+    manageCellEvents(true);
 }
 
 function checkForWin() {
     if (GAME.isGameOver) {
-        console.log('Current game has ended');
         updateWinner();
 
         return true;
@@ -275,23 +297,6 @@ function resetWinner() {
     if (!GAME.hasWinner) {
         winner.textContent = '';
     }
-}
-
-function handleComputerAttack(gridElement) {
-    togglePlayerTurnState(gridElement, false);
-    // Handle the computer's turn, which happens inside takeTurn()
-    const lastComputerAttack = GAME.playerTwo.attackHistory.slice(-1)[0]; // Get last attack result
-    console.log(lastComputerAttack);
-    if (lastComputerAttack) {
-        const [computerRow, computerCol] = convertToGridCoordinates(lastComputerAttack.coordinates);
-        updatePlayerOneShipsStats(computerRow, computerCol);
-        // Update Player One's board UI for the computer's attack
-        updateCellUI(computerRow, computerCol, playerOneGameboard);
-        if (checkForWin()) {
-            return;
-        }
-    }
-    manageCellEvents(true);
 }
 
 function updateCellUI(row, col, gridElement) {
@@ -379,7 +384,6 @@ function togglePlayerTurnState(gridElement, isWaiting) {
 
     cells.forEach(cell => {
         if (cell.classList.contains('cell')) {
-            console.log('player turn state: ', isWaiting);
             cell.classList.toggle('waitTurn', isWaiting);
         }
     });
