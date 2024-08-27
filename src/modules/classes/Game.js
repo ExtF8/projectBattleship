@@ -124,21 +124,16 @@ export default class Game {
         let attackResult;
 
         // Check if it's player one's turn (human)
-        if (attackingPlayer === this.playerOne) {
-            attackResult = attackingPlayer.attack(defendingPlayer, coordinates);
-            // Check for win condition after player's attack
-            if (attackResult) {
-                this.checkForWin(defendingPlayer);
-            }
+        attackResult = attackingPlayer.attack(defendingPlayer, coordinates);
+        // Check for win condition after player's attack
+        if (attackResult) {
+            this.checkForWin(defendingPlayer);
+        }
 
-            // Switch to computer's turn if the game is not over
-            if (!this.isGameOver) {
-                this.switchTurn();
-                this.takeComputerTurn(); // Trigger computer's turn immediately
-            }
-        } else {
-            // It's player two's turn (computer)
-            attackResult = this.takeComputerTurn();
+        // Switch to computer's turn if the game is not over
+        if (!this.isGameOver) {
+            this.switchTurn();
+            this.takeComputerTurn(); // Trigger computer's turn immediately
         }
 
         return attackResult;
@@ -163,7 +158,6 @@ export default class Game {
         if (!this.isGameOver) {
             this.switchTurn();
         }
-
         return attackResult;
     }
 
@@ -184,9 +178,9 @@ export default class Game {
     checkForWin(defendingPlayer) {
         if (defendingPlayer.gameboard.allShipsSunk()) {
             this.isGameOver = true;
-
             this.declareWinner(defendingPlayer);
-            this.endGame()
+            this.endGame();
+            return;
         }
     }
 
@@ -199,7 +193,6 @@ export default class Game {
     declareWinner(defendingPlayer) {
         this.hasWinner = true;
         this.winner = defendingPlayer === this.playerOne ? 'Player Two' : 'Player One';
-        // console.log(`${winner} wins!`);
         return this.winner;
     }
 
