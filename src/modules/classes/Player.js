@@ -37,7 +37,9 @@ export class Player {
      * @returns {boolean} - Returns true if attack was successful (hit or miss), otherwise false.
      */
     attack(opponent, coordinates = []) {
+        // Early exit if the attack is not unique
         if (!this.isUniqueAttack(coordinates)) {
+            console.log(`Invalid attack at ${coordinates}. Not unique.`);
             return false;
         }
 
@@ -45,11 +47,18 @@ export class Player {
 
         this.attackHistory.push({ coordinates, result });
 
+        // Log attack details
+        // console.log(`${opponent} Attack on ${coordinates}: ${result ? 'Hit' : 'Miss'}`);
+        // console.log(`${opponent} Current attack history:`, this.attackHistory);
+
         if (result) {
             this.hits += 1;
         } else {
             this.misses += 1;
         }
+
+        // Log the increment of hits/misses
+        // console.log(`${opponent}  Hits: ${this.hits}, Misses: ${this.misses}`);
 
         return true;
     }
@@ -96,27 +105,39 @@ export class Player {
         let validAttack = false;
         let attemptedDirections = new Set();
 
+        // Initialize attack result
+        let attackResult = null;
+
         // If there are adjacent cells to attack, prioritize those.
         if (this.adjacentCells.length > 0) {
             while (this.adjacentCells.length > 0) {
                 coordinates = this.adjacentCells.shift();
-                if (!this.isInNoGoZone(coordinates)) {
-                    validAttack = this.attack(opponent, coordinates);
-                }
 
-                if (validAttack) {
-                    if (this.attackHistory[this.attackHistory.length - 1].result) {
-                        if (
-                            this.lastHit &&
-                            !this.shipHits.some(hit => this.arraysEqual(hit, this.lastHit))
-                        ) {
+                // Ensure coordinates have not been attacked before
+                if (!this.isInNoGoZone(coordinates) && this.isUniqueAttack(coordinates)) {
+                    console.log('misses before validAttack: ', this.misses);
+
+                    // Perform the attack
+                    validAttack = this.attack(opponent, coordinates); // This handles incrementing 'misses' or 'hits'
+                    attackResult = this.attackHistory[this.attackHistory.length - 1];
+
+                    console.log('misses after validAttack: ', this.misses);
+                    console.log('Attempting attack at coordinates:', coordinates);
+                    console.log('Attack result:', attackResult.result ? 'Hit' : 'Miss');
+
+                    // Check if the attack was a hit
+                    if (attackResult.result) {
+                        // Update last hit and directions
+                        this.lastHit = coordinates;
+
+                        if (!this.shipHits.some(hit => this.arraysEqual(hit, this.lastHit))) {
                             this.shipHits.push(this.lastHit);
                         }
 
                         this.updateDirection(this.lastHit, coordinates);
-                        this.lastHit = coordinates;
-                        break;
+                        break; // Exit the loop after a successful hit
                     } else {
+                        // If the attack was a miss, add direction to attempted directions
                         if (this.lastHit) {
                             const direction = this.getDirection(this.lastHit, coordinates);
                             attemptedDirections.add(direction);
@@ -126,22 +147,31 @@ export class Player {
             }
         }
 
+        // If no valid attack from adjacent cells, fallback to random attack
         if (!validAttack) {
             do {
                 coordinates = this.getRandomCoordinates();
-                if (!this.isInNoGoZone(coordinates)) {
+                if (!this.isInNoGoZone(coordinates) && this.isUniqueAttack(coordinates)) {
                     validAttack = this.attack(opponent, coordinates);
+                    attackResult = this.attackHistory[this.attackHistory.length - 1];
+
+                    console.log('Attempting random attack at coordinates:', coordinates);
+                    console.log('Attack result:', attackResult.result ? 'Hit' : 'Miss');
                 }
             } while (!validAttack);
         }
 
+        // Handling the results after determining valid attack
         if (validAttack && this.attackHistory[this.attackHistory.length - 1].result) {
+            // Successful hit
             const ship = opponent.gameboard.getShipAt(coordinates);
-            if (ship.isSunk()) {
+            if (ship && ship.isSunk()) {
+                console.log('Ship sunk!');
                 this.handleSunkShip([...this.shipHits, this.lastHit]);
                 this.shipHits = [];
                 this.lastHit = null;
             } else {
+                // Managing state post-hit
                 const previousHit = this.lastHit;
                 this.lastHit = coordinates;
 
@@ -151,6 +181,7 @@ export class Player {
 
                 this.updateDirection(previousHit, coordinates);
 
+                // Update adjacent cells to attack next
                 this.adjacentCells = [
                     ...this.adjacentCells,
                     ...this.getAdjacentCells(coordinates).filter(
@@ -162,20 +193,23 @@ export class Player {
                 ];
             }
         } else if (!validAttack && this.adjacentCells.length === 0) {
+            // Handle no valid attacks
             this.lastDirection = null;
             this.adjacentCells = [];
         }
 
-        // console.log('last hit: ', this.lastHit);
-        // console.log('shipHits: ', this.shipHits); // Now this should be an argument in getSurroundingCells of sunk ship
-        // console.log('no go zones: ', this.noGoZones);
-
-        // console.log('lastDirection: ', this.lastDirection);
-        // console.log('adjacentCells: ', this.adjacentCells);
-        // console.log('sunkShips: ', this.sunkShips);
+        // Additional logs
+        console.log('misses: ', this.misses);
+        console.log('last hit: ', this.lastHit);
+        console.log('shipHits: ', this.shipHits);
+        console.log('no go zones: ', this.noGoZones);
 
         return validAttack;
     }
+
+    // console.log('lastDirection: ', this.lastDirection);
+    // console.log('adjacentCells: ', this.adjacentCells);
+    // console.log('sunkShips: ', this.sunkShips);
 
     getDirection(previousHit, currentHit) {
         if (!previousHit || !currentHit) {
