@@ -32,6 +32,8 @@ initGame();
 function toggleGameState() {
     if (GAME.hasGameStarted) {
         quitGame(); // If the game has already started, quit it
+    } else if (GAME.isGameOver) {
+        endCurrentGame();
     } else {
         startGame(); // Otherwise, start a new game
     }
@@ -72,8 +74,6 @@ function quitGame() {
     }
 
     endCurrentGame();
-
-    // updateButtonLabel();
 }
 
 function endCurrentGame() {
@@ -99,7 +99,7 @@ function endCurrentGame() {
 
 // Function to update the game button label based on game state
 function updateButtonLabel() {
-    if (GAME.hasGameStarted) {
+    if (GAME.hasGameStarted || GAME.isGameOver) {
         gameStateButton.textContent = 'End Game';
     } else {
         gameStateButton.textContent = 'Start New Game';
@@ -190,10 +190,10 @@ function renderGameboard(grid, gridElement) {
                 cellElement.classList.add('ship-cell');
             }
 
-            if (gridElement.id === 'playerTwoGameboard') {
-                cellElement.classList.add('cell-PlayerTwo');
-                cellElement.classList.remove('ship-cell');
-            }
+            // if (gridElement.id === 'playerTwoGameboard') {
+            //     cellElement.classList.add('cell-PlayerTwo');
+            //     cellElement.classList.remove('ship-cell');
+            // }
 
             gridElement.appendChild(cellElement);
         });
