@@ -103,173 +103,244 @@ export class Player {
     computerAttack(opponent) {
         let coordinates;
         let validAttack = false;
-        let attemptedDirections = new Set();
-
-        // Initialize attack result
-        let attackResult = null;
 
         if (this.adjacentCells.length > 0) {
-            // let adjacentMiss = false; // Track if miss occurred in adjacent cell strategy
-
+            // Prioritize attacking adjacent cells
             while (this.adjacentCells.length > 0) {
                 coordinates = this.adjacentCells.shift();
 
-                // Ensure coordinates have not been attacked before
                 if (!this.isInNoGoZone(coordinates) && this.isUniqueAttack(coordinates)) {
-                    console.log('misses before validAttack: ', this.misses);
                     console.log('Attempting attack at coordinates:', coordinates);
 
-                    // Perform the attack
                     validAttack = this.attack(opponent, coordinates);
-                    attackResult = this.attackHistory[this.attackHistory.length - 1];
+                    const attackResult = this.attackHistory[this.attackHistory.length - 1];
 
-                    console.log('misses after validAttack: ', this.misses);
                     console.log('Attack result:', attackResult.result ? 'Hit' : 'Miss');
 
-                    // Check if the attack was a hit
                     if (attackResult.result) {
-                        // Update last hit and directions
-                        this.lastHit = coordinates;
-
-                        if (!this.shipHits.some(hit => this.arraysEqual(hit, this.lastHit))) {
-                            this.shipHits.push(this.lastHit);
-                        }
-
-                        this.updateDirection(this.lastHit, coordinates);
-                        break; // Exit the loop after a successful hit
+                        this.handleHit(coordinates);
+                        break;
                     } else {
-                        // adjacentMiss = true; // Flag that we had a miss on an adjacent cell
-
-                        // If the attack was a miss, add direction to attempted directions
-                        if (this.lastHit) {
-                            const direction = this.getDirection(this.lastHit, coordinates);
-                            attemptedDirections.add(direction);
-                        }
+                        this.handleMiss();
                         break;
                     }
                 }
             }
-
-            // // Correctly adjust misses if only adjacent misses happened
-            // if (adjacentMiss) {
-            //     this.misses -= 1; // Revert the miss count adjustment if it was only adjacent cell misses
-            // }
         }
 
-        // If no valid attack from adjacent cells, fallback to random attack
         if (!validAttack) {
+            // Fallback to random attack if no valid adjacent cells
             do {
                 coordinates = this.getRandomCoordinates();
                 if (!this.isInNoGoZone(coordinates) && this.isUniqueAttack(coordinates)) {
-                    validAttack = this.attack(opponent, coordinates);
-                    attackResult = this.attackHistory[this.attackHistory.length - 1];
-
                     console.log('Attempting random attack at coordinates:', coordinates);
+                    validAttack = this.attack(opponent, coordinates);
+                    const attackResult = this.attackHistory[this.attackHistory.length - 1];
+
                     console.log('Attack result:', attackResult.result ? 'Hit' : 'Miss');
                 }
             } while (!validAttack);
         }
 
-        // Handling the results after determining valid attack
-        if (validAttack && this.attackHistory[this.attackHistory.length - 1].result) {
-            // Successful hit
-            const ship = opponent.gameboard.getShipAt(coordinates);
-            if (ship && ship.isSunk()) {
-                console.log('Ship sunk!');
-                this.handleSunkShip([...this.shipHits, this.lastHit]);
-                this.shipHits = [];
-                this.lastHit = null;
-            } else {
-                // Managing state post-hit
-                const previousHit = this.lastHit;
-                this.lastHit = coordinates;
-
-                if (!this.shipHits.some(hit => this.arraysEqual(hit, this.lastHit))) {
-                    this.shipHits.push(this.lastHit);
-                }
-
-                this.updateDirection(previousHit, coordinates);
-
-                // Update adjacent cells to attack next
-                this.adjacentCells = [
-                    ...this.adjacentCells,
-                    ...this.getAdjacentCells(coordinates).filter(
-                        cell =>
-                            this.isUniqueAttack(cell) &&
-                            !attemptedDirections.has(this.getDirection(coordinates, cell)) &&
-                            !this.isInNoGoZone(cell)
-                    ),
-                ];
-            }
-        } else if (!validAttack && this.adjacentCells.length === 0) {
-            // Handle no valid attacks
-            this.lastDirection = null;
-            this.adjacentCells = [];
+        // Handle attack results
+        if (validAttack) {
+            this.handlePostAttack(opponent, coordinates);
         }
 
-        // Additional logs
+        // Debug logs
         console.log('misses: ', this.misses);
         console.log('last hit: ', this.lastHit);
         console.log('shipHits: ', this.shipHits);
         console.log('no go zones: ', this.noGoZones);
+        console.log('lastDirection: ', this.lastDirection);
+        console.log('adjacentCells: ', this.adjacentCells);
+        console.log('sunkShips: ', this.sunkShips);
 
         return validAttack;
     }
 
-    // console.log('lastDirection: ', this.lastDirection);
-    // console.log('adjacentCells: ', this.adjacentCells);
-    // console.log('sunkShips: ', this.sunkShips);
+    /**
+     * Handles logic for a successful hit.
+     *
+     * @param {Array} coordinates - The coordinates of the successful hit.
+     */
+    handleHit(coordinates) {
+        this.shipHits.push(coordinates);
+        this.lastHit = coordinates;
 
-    getDirection(previousHit, currentHit) {
-        if (!previousHit || !currentHit) {
-            console.error(
-                'Invalid coordinates for direction calculation:',
-                previousHit,
-                currentHit
+        if (this.shipHits.length === 2) {
+            // Determine direction after the second hit
+            this.lastDirection = this.getGeneralDirection(this.shipHits);
+
+            console.log('Ship hits:', this.shipHits);
+            console.log('Determined direction:', this.lastDirection);
+
+            // Update adjacent cells based on direction
+            this.adjacentCells = this.filterCellsInDirection(
+                this.adjacentCells,
+                this.lastDirection
             );
-            return null;
-        }
+            console.log('Updated adjacent cells after filtering:', this.adjacentCells);
 
-        const [prevLetter, prevNumber] = previousHit;
-        const [currLetter, currNumber] = currentHit;
-
-        if (prevLetter === currLetter) {
-            return prevNumber < currNumber ? 'down' : 'up';
-        } else if (prevNumber === currNumber) {
-            return prevLetter < currLetter ? 'right' : 'left';
+            this.updateAdjacentCells(this.lastHit);
+        } else {
+            this.updateAdjacentCells(this.lastHit);
         }
-        return null;
     }
 
-    updateDirection(previousHit, currentHit) {
-        if (previousHit && currentHit) {
-            const direction = this.getDirection(previousHit, currentHit);
-            if (direction && direction !== this.lastDirection) {
-                // console.log(
-                //     `Updating direction from ${previousHit} to ${currentHit}: ${direction}`
-                // );
-                this.lastDirection = direction;
-            } else if (!direction) {
-                // console.log(
-                //     `Invalid direction from ${previousHit} to ${currentHit}. Resetting direction.`
-                // );
-                this.lastDirection = null;
+    /**
+     * Handles logic for a miss.
+     */
+    handleMiss() {
+        if (this.lastDirection) {
+            // Only keep cells in the current direction
+            this.adjacentCells = this.filterCellsInDirection(
+                this.adjacentCells,
+                this.lastDirection
+            );
+
+            if (this.adjacentCells.length === 0) {
+                this.lastDirection = null; // Reset direction if no cells left in direction
             }
         }
     }
 
-    isValidDirection([letter, number]) {
-        if (!this.lastDirection) {
-            // console.log(`No direction set, allowing move to ${letter}, ${number}`);
-            return true;
+    /**
+     * Handles post-attack logic including ship sinking.
+     *
+     * @param {Player} opponent - The opponent player.
+     * @param {Array} coordinates - The coordinates of the attack.
+     */
+    handlePostAttack(opponent, coordinates) {
+        const attackResult = this.attackHistory[this.attackHistory.length - 1];
+        if (attackResult.result) {
+            const ship = opponent.gameboard.getShipAt(coordinates);
+            if (ship.isSunk()) {
+                console.log('Ship sunk!');
+                this.handleSunkShip([...this.shipHits, this.lastHit]);
+                this.shipHits = [];
+                this.lastHit = null;
+                this.lastDirection = null; // Reset direction after sinking a ship
+            } else {
+                this.shipHits.push(coordinates);
+                this.lastHit = coordinates;
+                this.lastDirection =
+                    this.shipHits.length > 1 ? this.getGeneralDirection(this.shipHits) : null;
+                this.updateAdjacentCells(this.lastHit);
+            }
+        } else if (this.adjacentCells.length === 0) {
+            this.lastDirection = null;
+            this.adjacentCells = [];
+        }
+    }
+
+    /**
+     * Determines the general direction (horizontal or vertical) based on two hits.
+     *
+     * @param {Array} hits - An array of hit coordinates.
+     * @returns {string} - The direction ('horizontal' or 'vertical') or null if not determinable.
+     */
+    getGeneralDirection(hits) {
+        if (hits.length < 2) return null; // Need at least two hits to determine direction
+
+        const [firstHit, secondHit] = hits;
+        const [firstLetter, firstNumber] = firstHit;
+        const [secondLetter, secondNumber] = secondHit;
+
+        if (firstLetter === secondLetter) {
+            return 'vertical';
+        } else if (firstNumber === secondNumber) {
+            return 'horizontal';
         }
 
-        const [prevLetter, prevNumber] = this.lastHit;
-        const direction = this.getDirection([prevLetter, prevNumber], [letter, number]);
-        // console.log(
-        //     `Checking direction for ${letter}, ${number}: expected ${this.lastDirection}, got ${direction}`
-        // );
-        return direction === this.lastDirection;
+        return null;
+    }
+
+    /**
+     * Filters adjacent cells based on the determined direction of the ship.
+     * @param {Array} adjacentCells - Array of potential adjacent cells.
+     * @param {string} direction - The direction of the ship ('horizontal' or 'vertical').
+     * @returns {Array} - Filtered array of cells.
+     */
+    filterCellsInDirection(adjacentCells, direction) {
+        if (direction === 'horizontal') {
+            return adjacentCells.filter(([letter, number]) => {
+                // Retain cells in the same row (same number)
+                return number === this.shipHits[0][1]; // Compare with the number of the first hit
+            });
+        } else if (direction === 'vertical') {
+            return adjacentCells.filter(([letter, number]) => {
+                // Retain cells in the same column (same letter)
+                return letter === this.shipHits[0][0]; // Compare with the letter of the first hit
+            });
+        }
+
+        // If no direction is determined, do not filter
+        return adjacentCells;
+    }
+
+    /**
+     * Update the list of adjacent cells to attack based on the last hit.
+     *
+     * @param {Array} lastHit - The coordinates of the last hit.
+     */
+    updateAdjacentCells(lastHit) {
+        const possibleCells = this.getAdjacentCells(lastHit);
+
+        if (this.shipHits.length > 1 && this.lastDirection) {
+            // If we have determined a direction, only add cells in that direction
+            const cellsInDirection = this.filterCellsInDirection(possibleCells, this.lastDirection);
+
+            // Merge current adjacentCells with newly filtered cells, ensuring uniqueness
+            this.adjacentCells = Array.from(
+                new Set([
+                    ...this.adjacentCells.map(JSON.stringify),
+                    ...cellsInDirection.map(JSON.stringify),
+                ]).add(JSON.stringify(lastHit))
+            )
+                .map(cell => JSON.parse(cell))
+                .filter(cell => this.isUniqueAttack(cell) && !this.isInNoGoZone(cell));
+        } else {
+            // Otherwise, add all unique cells that are not in the no-go zone
+            this.adjacentCells = Array.from(
+                new Set([
+                    ...this.adjacentCells.map(JSON.stringify),
+                    ...possibleCells.map(JSON.stringify),
+                ])
+            )
+                .map(cell => JSON.parse(cell))
+                .filter(cell => this.isUniqueAttack(cell) && !this.isInNoGoZone(cell));
+        }
+    }
+
+    /**
+     * Get adjacent cells in a specified direction or in all directions if no direction is specified.
+     *
+     * @param {Array} lastHit - The coordinates of the last hit, e.g., ['B', 4].
+     * @param {string} [direction=null] - The direction to filter adjacent cells ('horizontal', 'vertical', or null for all).
+     * @returns {Array} - An array of adjacent cells in the specified direction.
+     */
+    getAdjacentCells([letter, number], direction = null) {
+        const letters = 'ABCDEFGHIJ'.split('');
+        const letterIndex = letters.indexOf(letter);
+        const possibleCells = [];
+
+        // Determine possible cells in all directions if no specific direction is provided
+        if (!direction || direction === 'horizontal') {
+            // Left
+            if (letterIndex > 0) possibleCells.push([letters[letterIndex - 1], number]);
+            // Right
+            if (letterIndex < 9) possibleCells.push([letters[letterIndex + 1], number]);
+        }
+
+        if (!direction || direction === 'vertical') {
+            // Above
+            if (number > 1) possibleCells.push([letter, number - 1]);
+            // Below
+            if (number < 10) possibleCells.push([letter, number + 1]);
+        }
+
+        return possibleCells;
     }
 
     getRandomCoordinates() {
@@ -277,19 +348,6 @@ export class Player {
         const letter = letters[Math.floor(Math.random() * letters.length)];
         const number = Math.floor(Math.random() * 10) + 1;
         return [letter, number];
-    }
-
-    getAdjacentCells([letter, number]) {
-        const letters = 'ABCDEFGHIJ'.split('');
-        const letterIndex = letters.indexOf(letter);
-        const possibleCells = [];
-
-        if (letterIndex > 0) possibleCells.push([letters[letterIndex - 1], number]); // Left
-        if (letterIndex < 9) possibleCells.push([letters[letterIndex + 1], number]); // Right
-        if (number > 1) possibleCells.push([letter, number - 1]); // Above
-        if (number < 10) possibleCells.push([letter, number + 1]); // Below
-
-        return possibleCells;
     }
 
     /**
@@ -355,7 +413,10 @@ export class Player {
             });
         }
 
-        // console.log('get surrounding Cells: ', surroundingCells);
+        // Ensure surrounding cells are correctly marked as no-go zones
+        this.noGoZones = new Set([...this.noGoZones, ...Array.from(surroundingCells)]);
+
+        console.log('get surrounding Cells: ', surroundingCells);
         return Array.from(surroundingCells).map(cell => JSON.parse(cell));
     }
 
@@ -368,3 +429,55 @@ export class Player {
         this.misses = 0;
     }
 }
+
+// getDirection(previousHit, currentHit) {
+//     if (!previousHit || !currentHit) {
+//         console.error(
+//             'Invalid coordinates for direction calculation:',
+//             previousHit,
+//             currentHit
+//         );
+//         return null;
+//     }
+
+//     const [prevLetter, prevNumber] = previousHit;
+//     const [currLetter, currNumber] = currentHit;
+
+//     if (prevLetter === currLetter) {
+//         return prevNumber < currNumber ? 'down' : 'up';
+//     } else if (prevNumber === currNumber) {
+//         return prevLetter < currLetter ? 'right' : 'left';
+//     }
+//     return null;
+// }
+
+// updateDirection(previousHit, currentHit) {
+//     if (previousHit && currentHit) {
+//         const direction = this.getDirection(previousHit, currentHit);
+//         if (direction && direction !== this.lastDirection) {
+//             console.log(
+//                 `Updating direction from ${previousHit} to ${currentHit}: ${direction}`
+//             );
+//             this.lastDirection = direction;
+//         } else if (!direction) {
+//             console.log(
+//                 `Invalid direction from ${previousHit} to ${currentHit}. Resetting direction.`
+//             );
+//             this.lastDirection = null;
+//         }
+//     }
+// }
+
+// isValidDirection([letter, number]) {
+//     if (!this.lastDirection) {
+//         // console.log(`No direction set, allowing move to ${letter}, ${number}`);
+//         return true;
+//     }
+
+//     const [prevLetter, prevNumber] = this.lastHit;
+//     const direction = this.getDirection([prevLetter, prevNumber], [letter, number]);
+//     console.log(
+//         `Checking direction for ${letter}, ${number}: expected ${this.lastDirection}, got ${direction}`
+//     );
+//     return direction === this.lastDirection;
+// }
