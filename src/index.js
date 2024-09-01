@@ -55,6 +55,7 @@ function startGame() {
     randomizeShips.removeEventListener('click', displayPlacedRandomShips);
 
     updateButtonLabel();
+    updateRandomButtonState();
 }
 
 function areYouSureToQuitGame() {
@@ -85,6 +86,7 @@ function endCurrentGame() {
 
     displayPlacedRandomShips();
     updateButtonLabel();
+    updateRandomButtonState();
     GAME.resetGame();
 
     initGame();
@@ -103,6 +105,17 @@ function updateButtonLabel() {
         gameStateButton.textContent = 'End Game';
     } else {
         gameStateButton.textContent = 'Start New Game';
+    }
+}
+
+function updateRandomButtonState() {
+    const button = document.getElementById('randomPlacement');
+
+    if (GAME.hasGameStarted) {
+        button.classList.add('disabled');
+        button;
+    } else {
+        button.classList.remove('disabled');
     }
 }
 
@@ -190,10 +203,10 @@ function renderGameboard(grid, gridElement) {
                 cellElement.classList.add('ship-cell');
             }
 
-            // if (gridElement.id === 'playerTwoGameboard') {
-            //     cellElement.classList.add('cell-PlayerTwo');
-            //     cellElement.classList.remove('ship-cell');
-            // }
+            if (gridElement.id === 'playerTwoGameboard') {
+                cellElement.classList.add('cell-PlayerTwo');
+                cellElement.classList.remove('ship-cell');
+            }
 
             gridElement.appendChild(cellElement);
         });

@@ -241,6 +241,11 @@ header {
     background-color: yellow;
 }
 
+.disabled {
+    pointer-events: none;
+    opacity: 0.2;
+}
+
 /* Styling for the X symbol */
 .x::before,
 .x::after {
@@ -276,11 +281,6 @@ header {
 
 /* Mobile - 360px */
 @media only screen and (min-width: 0rem) {
-    .forecast_container {
-        margin-inline: 10px;
-        flex-flow: wrap;
-    }
-
     .main_container {
         margin-bottom: 18vh;
     }
