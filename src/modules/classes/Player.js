@@ -44,12 +44,7 @@ export class Player {
         }
 
         const result = opponent.gameboard.receiveAttack(coordinates);
-
         this.attackHistory.push({ coordinates, result });
-
-        // Log attack details
-        // console.log(`${opponent} Attack on ${coordinates}: ${result ? 'Hit' : 'Miss'}`);
-        // console.log(`${opponent} Current attack history:`, this.attackHistory);
 
         if (result) {
             this.hits += 1;
@@ -57,41 +52,7 @@ export class Player {
             this.misses += 1;
         }
 
-        // Log the increment of hits/misses
-        // console.log(`${opponent}  Hits: ${this.hits}, Misses: ${this.misses}`);
-
         return true;
-    }
-
-    /**
-     * Validate if the attack has already been made on coordinates.
-     *
-     * @param {Array} coordinates - The coordinates to check.
-     * @returns {Boolean} - Returns true if coordinates are unique, otherwise false.
-     */
-    isUniqueAttack(coordinates) {
-        // Check if attack has already been made
-        let attackExists = this.attackHistory.some(item => {
-            return this.arraysEqual(coordinates, item.coordinates);
-        });
-
-        // Return true if no previous attack was found
-        return !attackExists;
-    }
-
-    /**
-     * Helper function to compare two arrays.
-     *
-     * @param {Array} arr1 - First array, incoming coordinates.
-     * @param {Array} arr2 - Second array, existing coordinates.
-     * @returns {Boolean} - Returns true if arrays are equal, otherwise false.
-     */
-    arraysEqual(arr1, arr2) {
-        if (arr1.length !== arr2.length) {
-            return false;
-        }
-
-        return arr1.every((value, index) => value === arr2[index]);
     }
 
     /**
@@ -104,57 +65,74 @@ export class Player {
         let coordinates;
         let validAttack = false;
 
+        console.log('comp attack: ', coordinates)
+
+        // Prioritize attacking adjacent cells
         if (this.adjacentCells.length > 0) {
-            // Prioritize attacking adjacent cells
-            while (this.adjacentCells.length > 0) {
-                coordinates = this.adjacentCells.shift();
-
-                if (!this.isInNoGoZone(coordinates) && this.isUniqueAttack(coordinates)) {
-                    console.log('Attempting attack at coordinates:', coordinates);
-
-                    validAttack = this.attack(opponent, coordinates);
-                    const attackResult = this.attackHistory[this.attackHistory.length - 1];
-
-                    console.log('Attack result:', attackResult.result ? 'Hit' : 'Miss');
-
-                    if (attackResult.result) {
-                        this.handleHit(coordinates);
-                        break;
-                    } else {
-                        this.handleMiss();
-                        break;
-                    }
-                }
-            }
+            validAttack = this.attackAdjacentCells(opponent);
         }
 
+        // First attack
         if (!validAttack) {
             // Fallback to random attack if no valid adjacent cells
-            do {
-                coordinates = this.getRandomCoordinates();
-                if (!this.isInNoGoZone(coordinates) && this.isUniqueAttack(coordinates)) {
-                    console.log('Attempting random attack at coordinates:', coordinates);
-                    validAttack = this.attack(opponent, coordinates);
-                    const attackResult = this.attackHistory[this.attackHistory.length - 1];
-
-                    console.log('Attack result:', attackResult.result ? 'Hit' : 'Miss');
-                }
-            } while (!validAttack);
+            validAttack = this.attackRandomCoordinates(opponent);
         }
 
         // Handle attack results
         if (validAttack) {
+            console.log([coordinates])
             this.handlePostAttack(opponent, coordinates);
         }
 
-        // Debug logs
-        console.log('misses: ', this.misses);
-        console.log('last hit: ', this.lastHit);
-        console.log('shipHits: ', this.shipHits);
-        console.log('no go zones: ', this.noGoZones);
-        console.log('lastDirection: ', this.lastDirection);
-        console.log('adjacentCells: ', this.adjacentCells);
-        console.log('sunkShips: ', this.sunkShips);
+        return validAttack;
+    }
+
+    /**
+     * Attempts to attack using prioritized adjacent cells.
+     *
+     * @param {Player} opponent - The opponent player.
+     * @returns {Boolean} - Returns true if a valid attack was made, otherwise false.
+     */
+    attackAdjacentCells(opponent) {
+        let coordinates;
+        let validAttack = false;
+
+        while (this.adjacentCells.length > 0) {
+            coordinates = this.adjacentCells.shift();
+
+            if (this.isValidAttack(coordinates)) {
+                validAttack = this.attack(opponent, coordinates);
+                const attackResult = this.attackHistory[this.attackHistory.length - 1];
+
+                if (attackResult.result) {
+                    this.handleHit(coordinates);
+                    break;
+                } else {
+                    this.handleMiss();
+                    break;
+                }
+            }
+        }
+
+        return validAttack;
+    }
+
+    /**
+     * Performs attack on random coordinates.
+     *
+     * @param {Player} opponent - The opponent player
+     * @returns {Boolean} - Returns true if valid attack was made, otherwise false.
+     */
+    attackRandomCoordinates(opponent) {
+        let coordinates;
+        let validAttack = false;
+
+        do {
+            coordinates = this.getRandomCoordinates();
+            if (this.isValidAttack(coordinates)) {
+                validAttack = this.attack(opponent, coordinates);
+            }
+        } while (!validAttack);
 
         return validAttack;
     }
@@ -172,15 +150,11 @@ export class Player {
             // Determine direction after the second hit
             this.lastDirection = this.getGeneralDirection(this.shipHits);
 
-            console.log('Ship hits:', this.shipHits);
-            console.log('Determined direction:', this.lastDirection);
-
             // Update adjacent cells based on direction
             this.adjacentCells = this.filterCellsInDirection(
                 this.adjacentCells,
                 this.lastDirection
             );
-            console.log('Updated adjacent cells after filtering:', this.adjacentCells);
 
             this.updateAdjacentCells(this.lastHit);
         } else {
@@ -190,6 +164,7 @@ export class Player {
 
     /**
      * Handles logic for a miss.
+     *
      */
     handleMiss() {
         if (this.lastDirection) {
@@ -200,7 +175,8 @@ export class Player {
             );
 
             if (this.adjacentCells.length === 0) {
-                this.lastDirection = null; // Reset direction if no cells left in direction
+                // Reset direction if no cells left in direction
+                this.lastDirection = null;
             }
         }
     }
@@ -212,15 +188,14 @@ export class Player {
      * @param {Array} coordinates - The coordinates of the attack.
      */
     handlePostAttack(opponent, coordinates) {
+        console.log('post hit: ' ,coordinates)
         const attackResult = this.attackHistory[this.attackHistory.length - 1];
+
         if (attackResult.result) {
             const ship = opponent.gameboard.getShipAt(coordinates);
+
             if (ship.isSunk()) {
-                console.log('Ship sunk!');
                 this.handleSunkShip([...this.shipHits, this.lastHit]);
-                this.shipHits = [];
-                this.lastHit = null;
-                this.lastDirection = null; // Reset direction after sinking a ship
             } else {
                 this.shipHits.push(coordinates);
                 this.lastHit = coordinates;
@@ -258,6 +233,7 @@ export class Player {
 
     /**
      * Filters adjacent cells based on the determined direction of the ship.
+     *
      * @param {Array} adjacentCells - Array of potential adjacent cells.
      * @param {string} direction - The direction of the ship ('horizontal' or 'vertical').
      * @returns {Array} - Filtered array of cells.
@@ -334,31 +310,25 @@ export class Player {
         }
 
         if (!direction || direction === 'vertical') {
-            // Above
+            // Up
             if (number > 1) possibleCells.push([letter, number - 1]);
-            // Below
+            // Down
             if (number < 10) possibleCells.push([letter, number + 1]);
         }
 
         return possibleCells;
     }
 
+    /**
+     * Generates random coordinates for computer attack.
+     *
+     * @returns {Array} - An array containing coordinates, letter and number, e.g., ['B', 4].
+     */
     getRandomCoordinates() {
         const letters = 'ABCDEFGHIJ'.split('');
         const letter = letters[Math.floor(Math.random() * letters.length)];
         const number = Math.floor(Math.random() * 10) + 1;
         return [letter, number];
-    }
-
-    /**
-     * Check if the coordinates are in the no-go zone.
-     *
-     * @param {Array} coordinates - The coordinates to check.
-     * @returns {Boolean} - Returns true if coordinates are in the no-go zone, otherwise false.
-     */
-    isInNoGoZone(coordinates) {
-        console.log('no go zone: ', coordinates);
-        return this.noGoZones.has(JSON.stringify(coordinates));
     }
 
     /**
@@ -373,6 +343,8 @@ export class Player {
         const surroundingCells = this.getSurroundingCells(shipCoordinates);
         surroundingCells.forEach(cell => this.noGoZones.add(JSON.stringify(cell)));
 
+        // Reset shipHits, hit and direction after sinking a ship
+        this.shipHits = [];
         this.lastHit = null;
         this.lastDirection = null;
     }
@@ -416,8 +388,58 @@ export class Player {
         // Ensure surrounding cells are correctly marked as no-go zones
         this.noGoZones = new Set([...this.noGoZones, ...Array.from(surroundingCells)]);
 
-        console.log('get surrounding Cells: ', surroundingCells);
         return Array.from(surroundingCells).map(cell => JSON.parse(cell));
+    }
+
+    /**
+     * Validates if the attack can be made at the given coordinates.
+     *
+     * @param {Array} coordinates - The coordinates to validate.
+     * @returns {Boolean} - True if the attack is valid, otherwise false.
+     */
+    isValidAttack(coordinates) {
+        return !this.isInNoGoZone(coordinates) && this.isUniqueAttack(coordinates);
+    }
+
+    /**
+     * Check if the coordinates are in the no-go zone.
+     *
+     * @param {Array} coordinates - The coordinates to check.
+     * @returns {Boolean} - Returns true if coordinates are in the no-go zone, otherwise false.
+     */
+    isInNoGoZone(coordinates) {
+        return this.noGoZones.has(JSON.stringify(coordinates));
+    }
+
+    /**
+     * Validate if the attack has already been made on coordinates.
+     *
+     * @param {Array} coordinates - The coordinates to check.
+     * @returns {Boolean} - Returns true if coordinates are unique, otherwise false.
+     */
+    isUniqueAttack(coordinates) {
+        // Check if attack has already been made
+        let attackExists = this.attackHistory.some(item => {
+            return this.arraysEqual(coordinates, item.coordinates);
+        });
+
+        // Return true if no previous attack was found
+        return !attackExists;
+    }
+
+    /**
+     * Helper function to compare two arrays.
+     *
+     * @param {Array} arr1 - First array, incoming coordinates.
+     * @param {Array} arr2 - Second array, existing coordinates.
+     * @returns {Boolean} - Returns true if arrays are equal, otherwise false.
+     */
+    arraysEqual(arr1, arr2) {
+        if (arr1.length !== arr2.length) {
+            return false;
+        }
+
+        return arr1.every((value, index) => value === arr2[index]);
     }
 
     /**
@@ -429,55 +451,3 @@ export class Player {
         this.misses = 0;
     }
 }
-
-// getDirection(previousHit, currentHit) {
-//     if (!previousHit || !currentHit) {
-//         console.error(
-//             'Invalid coordinates for direction calculation:',
-//             previousHit,
-//             currentHit
-//         );
-//         return null;
-//     }
-
-//     const [prevLetter, prevNumber] = previousHit;
-//     const [currLetter, currNumber] = currentHit;
-
-//     if (prevLetter === currLetter) {
-//         return prevNumber < currNumber ? 'down' : 'up';
-//     } else if (prevNumber === currNumber) {
-//         return prevLetter < currLetter ? 'right' : 'left';
-//     }
-//     return null;
-// }
-
-// updateDirection(previousHit, currentHit) {
-//     if (previousHit && currentHit) {
-//         const direction = this.getDirection(previousHit, currentHit);
-//         if (direction && direction !== this.lastDirection) {
-//             console.log(
-//                 `Updating direction from ${previousHit} to ${currentHit}: ${direction}`
-//             );
-//             this.lastDirection = direction;
-//         } else if (!direction) {
-//             console.log(
-//                 `Invalid direction from ${previousHit} to ${currentHit}. Resetting direction.`
-//             );
-//             this.lastDirection = null;
-//         }
-//     }
-// }
-
-// isValidDirection([letter, number]) {
-//     if (!this.lastDirection) {
-//         // console.log(`No direction set, allowing move to ${letter}, ${number}`);
-//         return true;
-//     }
-
-//     const [prevLetter, prevNumber] = this.lastHit;
-//     const direction = this.getDirection([prevLetter, prevNumber], [letter, number]);
-//     console.log(
-//         `Checking direction for ${letter}, ${number}: expected ${this.lastDirection}, got ${direction}`
-//     );
-//     return direction === this.lastDirection;
-// }
