@@ -270,7 +270,6 @@ export class Gameboard {
      * @returns {number} - The index of the letter
      */
     letterToIndex(letter) {
-        console.log(letter)
         return letter.charCodeAt() - 'A'.charCodeAt(0);
     }
 
