@@ -1,5 +1,5 @@
 import { Ship } from './Ship.js';
-import { convertCoordinates, indexToLetter } from '../../utility/utils.js';
+import { convertCoordinatesToIndices, indexToLetter } from '../../utility/utils.js';
 
 /**
  * Represents a Gameboard.
@@ -57,7 +57,7 @@ export class Gameboard {
      */
     placeShip(ship, startCoordinates, direction) {
         // const [startRow, startCol] = startCoordinates;
-        const [x, y] = convertCoordinates(startCoordinates);
+        const [x, y] = convertCoordinatesToIndices(startCoordinates);
 
         // Validate the placement
         if (!this.validatePlacement(ship, x, y, direction)) {
@@ -213,8 +213,7 @@ export class Gameboard {
      * @returns {Object||null} - The ship at coordinates, or null if none exists.
      */
     getShipAt(coordinates = []) {
-        console.log(coordinates)
-        const [x, y] = convertCoordinates(coordinates);
+        const [x, y] = convertCoordinatesToIndices(coordinates);
         let shipAt = this.grid[y][x];
         return shipAt;
     }
@@ -226,7 +225,6 @@ export class Gameboard {
      * @returns {boolean} - True if the attack hit a ship, false otherwise.
      */
     receiveAttack(coordinates = []) {
-        console.log(coordinates)
         let hit = false;
         let target = this.getShipAt(coordinates);
         const [letter, number] = coordinates;
