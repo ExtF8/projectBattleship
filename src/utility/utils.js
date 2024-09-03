@@ -5,10 +5,25 @@
  * @param {number} number - The number representing the row, e.g., (1-10).
  * @returns {number[]} - An array containing the x and y indices.
  */
-export function convertCoordinates(coordinates = []) {
+export function convertCoordinatesToIndices(coordinates = []) {
     const [letter, number] = coordinates;
     const x = letterToIndex(letter);
     const y = number - 1;
+
+    return [x, y];
+}
+
+/**
+ * Converts grid coordinates form x and y indices to letter and number.
+ *
+ * @param {string} letter - The letter representing the column, e.g., (A-J).
+ * @param {number} number - The number representing the row, e.g., (1-10).
+ * @returns {number[]} - An array containing the letter and number.
+ */
+export function convertCoordinatesFromIndices(coordinates = []) {
+    const [letter, number] = coordinates;
+    const x = indexToLetter(letter);
+    const y = number + 1;
 
     return [x, y];
 }
@@ -31,11 +46,4 @@ export function letterToIndex(letter) {
  */
 export function indexToLetter(index) {
     return String.fromCharCode('A'.charCodeAt(0) + index);
-}
-
-export function convertToGridCoordinates(coordinates) {
-    const [x, y] = coordinates;
-    const col = letterToIndex(x);
-    const row = y - 1;
-    return [row, col];
 }
