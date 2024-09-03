@@ -1,8 +1,6 @@
 import Game from './modules/classes/Game.js';
-import { Gameboard } from './modules/classes/Gameboard.js';
 import { Ship } from './modules/classes/Ship.js';
-
-import addGridLabels from './modules/dom/domHelper.js';
+import { convertCoordinatesToIndices, convertCoordinatesFromIndices } from './utility/utils.js';
 
 const gameStateButton = document.getElementById('gameStateToggle');
 const randomizeShips = document.getElementById('randomPlacement');
@@ -99,6 +97,7 @@ function endCurrentGame() {
     resetGameboardVisuals(playerTwoGameboard, 'playerTwoShips');
 }
 
+// UI
 // Function to update the game button label based on game state
 function updateButtonLabel() {
     if (GAME.hasGameStarted || GAME.isGameOver) {
@@ -108,6 +107,7 @@ function updateButtonLabel() {
     }
 }
 
+//UI
 function updateRandomButtonState() {
     const button = document.getElementById('randomPlacement');
 
@@ -119,6 +119,7 @@ function updateRandomButtonState() {
     }
 }
 
+// UI
 // Function to reset gameboard visuals
 function resetGameboardVisuals(gridElement, shipElementId) {
     const playerShips = document.getElementById(shipElementId);
@@ -145,6 +146,7 @@ function resetGameboardVisuals(gridElement, shipElementId) {
     resetWinner();
 }
 
+// UI
 function resetHitsAndMisses() {
     updatePlayerOneScore();
     updatePlayerTwoScore();
@@ -152,6 +154,7 @@ function resetHitsAndMisses() {
 
 gameStateButton.addEventListener('click', toggleGameState);
 
+// UI
 function displayPlacedRandomShips() {
     GAME.playerOne.gameboard.clearShips();
     GAME.playerTwo.gameboard.clearShips();
@@ -166,6 +169,7 @@ function displayPlacedRandomShips() {
 
 randomizeShips.addEventListener('click', displayPlacedRandomShips);
 
+// UI
 function renderGameboard(grid, gridElement) {
     gridElement.innerHTML = ''; // Clear any existing content
 
@@ -234,16 +238,17 @@ function cellClickHandler(event) {
         return;
     }
 
-    handleAttack(row, col, playerTwoGameboard);
+    handleAttack(col, row, playerTwoGameboard);
 }
 
-function handleAttack(row, col, gridElement) {
-    const [x, y] = convertCoordinates(row, col);
+function handleAttack(col, row, gridElement) {
+    const [x, y] = convertCoordinatesFromIndices([col, row]);
+
     GAME.takeTurn([x, y]);
 
-    updateCellUI(row, col, gridElement);
+    updateCellUI(col, row, gridElement);
     updatePlayerOneScore();
-    updatePlayerTwoShipsStats(row, col);
+    updatePlayerTwoShipsStats(col, row);
 
     manageCellEvents(false);
 
@@ -267,10 +272,10 @@ function handleComputerAttack(gridElement) {
     const lastComputerAttack = GAME.playerTwo.attackHistory.slice(-1)[0]; // Get last attack result
 
     if (lastComputerAttack) {
-        const [computerRow, computerCol] = convertToGridCoordinates(lastComputerAttack.coordinates);
-        updatePlayerOneShipsStats(computerRow, computerCol);
+        const [computerCol, computerRow] = convertCoordinatesToIndices(lastComputerAttack.coordinates);
+        updatePlayerOneShipsStats(computerCol, computerRow);
         // Update Player One's board UI after the computer's attack
-        updateCellUI(computerRow, computerCol, playerOneGameboard);
+        updateCellUI(computerCol, computerRow, playerOneGameboard);
         updatePlayerTwoScore();
     }
 
@@ -290,6 +295,7 @@ function checkForWin() {
     return false;
 }
 
+// UI
 function updateWinner() {
     displayWinner();
     updateButtonLabel();
@@ -297,6 +303,7 @@ function updateWinner() {
     manageCellEvents(false);
 }
 
+// UI
 function displayWinner() {
     const winner = document.getElementById('winner');
     if (GAME.hasWinner) {
@@ -304,6 +311,7 @@ function displayWinner() {
     }
 }
 
+// UI
 function resetWinner() {
     const winner = document.getElementById('winner');
 
@@ -312,7 +320,8 @@ function resetWinner() {
     }
 }
 
-function updateCellUI(row, col, gridElement) {
+// UI
+function updateCellUI(col, row, gridElement) {
     const cellSelector = `.cell[data-row="${row}"][data-col="${col}"]`;
     const cellElement = gridElement.querySelector(cellSelector);
 
@@ -333,6 +342,7 @@ function updateCellUI(row, col, gridElement) {
     }
 }
 
+// UI
 // Helper function to update the score for any player
 function updatePlayerScore(player, hitElementId, missElementId) {
     const hitStats = document.getElementById(hitElementId);
@@ -342,29 +352,35 @@ function updatePlayerScore(player, hitElementId, missElementId) {
     missStats.innerText = player.misses;
 }
 
+// UI
 // Function to update Player One's score
 function updatePlayerOneScore() {
     updatePlayerScore(GAME.playerOne, 'playerOneHits', 'playerOneMisses');
 }
 
+// UI
 // Function to update Player Two's score
 function updatePlayerTwoScore() {
     updatePlayerScore(GAME.playerTwo, 'playerTwoHits', 'playerTwoMisses');
 }
 
+// UI
 // Function to update Player One's ship stats
-function updatePlayerOneShipsStats(row, col) {
-    updatePlayerShipsStats(GAME.playerOne, row, col, 'playerOneShips');
+function updatePlayerOneShipsStats(col, row) {
+    updatePlayerShipsStats(GAME.playerOne, col, row, 'playerOneShips');
 }
 
+// UI
 // Function to update Player Two's ship stats
-function updatePlayerTwoShipsStats(row, col) {
-    updatePlayerShipsStats(GAME.playerTwo, row, col, 'playerTwoShips');
+function updatePlayerTwoShipsStats(col, row) {
+    updatePlayerShipsStats(GAME.playerTwo, col, row, 'playerTwoShips');
 }
 
+// UI
 // Helper function to update ship stats for any player
-function updatePlayerShipsStats(player, row, col, shipElementId) {
-    const [x, y] = convertCoordinates(row, col);
+function updatePlayerShipsStats(player, col, row, shipElementId) {
+    const [x, y] = convertCoordinatesFromIndices([col, row]);
+
     const ship = player.gameboard.getShipAt([x, y]);
     const playerShips = document.getElementById(shipElementId);
 
@@ -400,25 +416,4 @@ function togglePlayerTurnState(gridElement, isWaiting) {
             cell.classList.toggle('waitTurn', isWaiting);
         }
     });
-}
-
-function convertCoordinates(row, col) {
-    const x = indexToLetter(col);
-    const y = row + 1;
-    return [x, y];
-}
-
-function indexToLetter(index) {
-    return String.fromCharCode('A'.charCodeAt(0) + index);
-}
-
-function convertToGridCoordinates(coordinates) {
-    const [x, y] = coordinates;
-    const col = letterToIndex(x);
-    const row = y - 1;
-    return [row, col];
-}
-
-function letterToIndex(letter) {
-    return letter.charCodeAt(0) - 'A'.charCodeAt(0);
 }
