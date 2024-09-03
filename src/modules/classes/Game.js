@@ -1,22 +1,26 @@
-import { Player } from './Player';
-import { Ship, ShipManager } from './Ship';
+import { Player } from './Player.js';
+import { Ship, ShipManager } from './Ship.js';
 
 /**
  * Represents a game of Battleship.
  *
  * @class
  */
-export class Game {
+export default class Game {
     /**
      * Creates an instance of Game.
      *
      */
     constructor() {
-        this.startGame = false;
+        this.hasGameStarted = false;
+        this.isGameOver = false;
         this.playerOne = null;
         this.playerTwo = null;
         this.currentTurn = null;
-        this.isGameOver = false;
+        this.playerOneShips = [];
+        this.playerTwoShips = [];
+        this.hasWinner = false;
+        this.winner = '';
         this.shipManager = new ShipManager();
         Ship.defaultShipManager = this.shipManager;
     }
@@ -25,13 +29,22 @@ export class Game {
      * Initializes the game by creating players, ships, and setting the starting turn.
      */
     initializeGame() {
-        this.resetGame();
-        this.startGame = true;
+        // this.resetGame();
+        this.hasGameStarted = false;
 
         this.playerOne = new Player(1, 'Human', false);
         this.playerTwo = new Player(2, 'Computer', true);
         this.initShips();
         this.currentTurn = this.playerOne;
+    }
+
+    startGame() {
+        this.hasGameStarted = true;
+    }
+
+    endGame() {
+        this.hasGameStarted = false;
+        // this.resetGame();
     }
 
     /**
@@ -102,24 +115,49 @@ export class Game {
      */
     takeTurn(coordinates) {
         if (this.isGameOver) {
-            throw new Error('Game is over');
+            return;
         }
-        // Define attacking and defending player
+
         const attackingPlayer = this.currentTurn;
         const defendingPlayer = this.getOpponent();
 
-        // Place an attack
-        const attackResult = attackingPlayer.attack(defendingPlayer, coordinates);
+        let attackResult;
 
-        // Check for win
+        // Check if it's player one's turn (human)
+        attackResult = attackingPlayer.attack(defendingPlayer, coordinates);
+        // Check for win condition after player's attack
         if (attackResult) {
             this.checkForWin(defendingPlayer);
         }
 
-        // Switch turn
-        this.switchTurn();
+        // Switch to computer's turn if the game is not over
+        if (!this.isGameOver) {
+            this.switchTurn();
+            this.takeComputerTurn(); // Trigger computer's turn immediately
+        }
 
-        // Return attackResult
+        return attackResult;
+    }
+
+    /**
+     * Handles the computer's turn.
+     *
+     */
+    takeComputerTurn() {
+        const attackingPlayer = this.playerTwo;
+        const defendingPlayer = this.playerOne;
+
+        const attackResult = attackingPlayer.computerAttack(defendingPlayer);
+
+        // Check for win condition after computer's attack
+        if (attackResult) {
+            this.checkForWin(defendingPlayer);
+        }
+
+        // Switch back to player's turn if the game is not over
+        if (!this.isGameOver) {
+            this.switchTurn();
+        }
         return attackResult;
     }
 
@@ -141,6 +179,8 @@ export class Game {
         if (defendingPlayer.gameboard.allShipsSunk()) {
             this.isGameOver = true;
             this.declareWinner(defendingPlayer);
+            this.endGame();
+            return;
         }
     }
 
@@ -151,9 +191,9 @@ export class Game {
      * @returns {string} The name of the winning player ('Player One' or 'Player Two').
      */
     declareWinner(defendingPlayer) {
-        const winner = defendingPlayer === this.playerOne ? 'Player Two' : 'Player One';
-        console.log(`${winner} wins!`);
-        return winner;
+        this.hasWinner = true;
+        this.winner = defendingPlayer === this.playerOne ? 'Player Two' : 'Player One';
+        return this.winner;
     }
 
     /**
@@ -167,11 +207,14 @@ export class Game {
      * Resets game to its initial state.
      */
     resetGame() {
-        this.startGame = false;
+        this.hasGameStarted = false;
         this.isGameOver = false;
+        if (this.playerOne) this.playerOne.resetScore();
+        if (this.playerTwo) this.playerTwo.resetScore();
+        this.currentTurn = null;
+        this.winner = '';
+        this.shipManager.clearShips();
         this.playerOne = null;
         this.playerTwo = null;
-        this.currentTurn = null;
-        this.shipManager.clearShips();
     }
 }
