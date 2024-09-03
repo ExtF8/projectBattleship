@@ -1,4 +1,5 @@
 import { Ship } from './Ship.js';
+import { convertCoordinates, indexToLetter } from '../../utility/utils.js';
 
 /**
  * Represents a Gameboard.
@@ -56,7 +57,7 @@ export class Gameboard {
      */
     placeShip(ship, startCoordinates, direction) {
         // const [startRow, startCol] = startCoordinates;
-        const [x, y] = this.convertCoordinates(startCoordinates);
+        const [x, y] = convertCoordinates(startCoordinates);
 
         // Validate the placement
         if (!this.validatePlacement(ship, x, y, direction)) {
@@ -97,15 +98,15 @@ export class Gameboard {
                 // Randomly choose starting coordinates
                 const startX = Math.floor(Math.random() * size);
                 const startY = Math.floor(Math.random() * size);
-                const startCoordinates = [this.indexToLetter(startX), startY + 1];
+                const startCoordinates = [indexToLetter(startX), startY + 1];
                 let positions = [];
 
                 // Calculate all positions based on the direction
                 for (let i = 0; i < ship.length; i++) {
                     if (direction === 'horizontal') {
-                        positions.push([this.indexToLetter(startX + i), startY + 1]);
+                        positions.push([indexToLetter(startX + i), startY + 1]);
                     } else {
-                        positions.push([this.indexToLetter(startX), startY + 1 + i]);
+                        positions.push([indexToLetter(startX), startY + 1 + i]);
                     }
                 }
 
@@ -212,7 +213,8 @@ export class Gameboard {
      * @returns {Object||null} - The ship at coordinates, or null if none exists.
      */
     getShipAt(coordinates = []) {
-        const [x, y] = this.convertCoordinates(coordinates);
+        console.log(coordinates)
+        const [x, y] = convertCoordinates(coordinates);
         let shipAt = this.grid[y][x];
         return shipAt;
     }
@@ -224,6 +226,7 @@ export class Gameboard {
      * @returns {boolean} - True if the attack hit a ship, false otherwise.
      */
     receiveAttack(coordinates = []) {
+        console.log(coordinates)
         let hit = false;
         let target = this.getShipAt(coordinates);
         const [letter, number] = coordinates;
@@ -246,40 +249,5 @@ export class Gameboard {
      */
     allShipsSunk() {
         return this.ships.every(ship => ship.isSunk());
-    }
-
-    /**
-     * Converts grid coordinates form letter and number to x and y indices.
-     *
-     * @param {string} letter - The letter representing the column, e.g., (A-J).
-     * @param {number} number - The number representing the row, e.g., (1-10).
-     * @returns {number[]} - An array containing the x and y indices.
-     */
-    convertCoordinates(coordinates = []) {
-        const [letter, number] = coordinates;
-        const x = this.letterToIndex(letter);
-        const y = number - 1;
-
-        return [x, y];
-    }
-
-    /**
-     * Converts a letter to its corresponding index.
-     *
-     * @param {string} letter - A letter to convert
-     * @returns {number} - The index of the letter
-     */
-    letterToIndex(letter) {
-        return letter.charCodeAt() - 'A'.charCodeAt(0);
-    }
-
-    /**
-     * Converts an index to its corresponding letter.
-     *
-     * @param {number} index - An index to convert
-     * @returns {string} - The corresponding letter
-     */
-    indexToLetter(index) {
-        return String.fromCharCode('A'.charCodeAt(0) + index);
     }
 }
