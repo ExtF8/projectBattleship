@@ -39,7 +39,6 @@ export class Player {
     attack(opponent, coordinates = []) {
         // Early exit if the attack is not unique
         if (!this.isUniqueAttack(coordinates)) {
-            console.log(`Invalid attack at ${coordinates}. Not unique.`);
             return false;
         }
 
@@ -65,22 +64,19 @@ export class Player {
         let coordinates;
         let validAttack = false;
 
-        console.log('comp attack: ', coordinates)
-
         // Prioritize attacking adjacent cells
         if (this.adjacentCells.length > 0) {
-            validAttack = this.attackAdjacentCells(opponent);
+            ({ validAttack, coordinates } = this.attackAdjacentCells(opponent));
         }
 
         // First attack
         if (!validAttack) {
             // Fallback to random attack if no valid adjacent cells
-            validAttack = this.attackRandomCoordinates(opponent);
+            ({ validAttack, coordinates } = this.attackRandomCoordinates(opponent));
         }
 
         // Handle attack results
         if (validAttack) {
-            console.log([coordinates])
             this.handlePostAttack(opponent, coordinates);
         }
 
@@ -91,7 +87,7 @@ export class Player {
      * Attempts to attack using prioritized adjacent cells.
      *
      * @param {Player} opponent - The opponent player.
-     * @returns {Boolean} - Returns true if a valid attack was made, otherwise false.
+     * @returns {Object} - Returns an object containing validAttack (boolean) and coordinates (Array).
      */
     attackAdjacentCells(opponent) {
         let coordinates;
@@ -105,23 +101,23 @@ export class Player {
                 const attackResult = this.attackHistory[this.attackHistory.length - 1];
 
                 if (attackResult.result) {
-                    this.handleHit(coordinates);
+                    this.processSuccessfulHit(coordinates);
                     break;
                 } else {
-                    this.handleMiss();
+                    this.processMissedAttack();
                     break;
                 }
             }
         }
 
-        return validAttack;
+        return { validAttack, coordinates };
     }
 
     /**
      * Performs attack on random coordinates.
      *
      * @param {Player} opponent - The opponent player
-     * @returns {Boolean} - Returns true if valid attack was made, otherwise false.
+     * @returns {Object} - Returns an object containing validAttack (boolean) and coordinates (Array).
      */
     attackRandomCoordinates(opponent) {
         let coordinates;
@@ -134,7 +130,7 @@ export class Player {
             }
         } while (!validAttack);
 
-        return validAttack;
+        return { validAttack, coordinates };
     }
 
     /**
@@ -142,22 +138,24 @@ export class Player {
      *
      * @param {Array} coordinates - The coordinates of the successful hit.
      */
-    handleHit(coordinates) {
+    processSuccessfulHit(coordinates) {
         this.shipHits.push(coordinates);
         this.lastHit = coordinates;
 
         if (this.shipHits.length === 2) {
-            // Determine direction after the second hit
+            // Determine the direction (horizontal or vertical) after the second hit
             this.lastDirection = this.getGeneralDirection(this.shipHits);
 
-            // Update adjacent cells based on direction
+            // Update adjacent cells based on the determined direction
             this.adjacentCells = this.filterCellsInDirection(
                 this.adjacentCells,
                 this.lastDirection
             );
 
+            // Update potential adjacent cells to target
             this.updateAdjacentCells(this.lastHit);
         } else {
+            // For the first hit or subsequent hits, update potential adjacent cells
             this.updateAdjacentCells(this.lastHit);
         }
     }
@@ -166,7 +164,7 @@ export class Player {
      * Handles logic for a miss.
      *
      */
-    handleMiss() {
+    processMissedAttack() {
         if (this.lastDirection) {
             // Only keep cells in the current direction
             this.adjacentCells = this.filterCellsInDirection(
@@ -188,25 +186,53 @@ export class Player {
      * @param {Array} coordinates - The coordinates of the attack.
      */
     handlePostAttack(opponent, coordinates) {
-        console.log('post hit: ' ,coordinates)
         const attackResult = this.attackHistory[this.attackHistory.length - 1];
 
         if (attackResult.result) {
-            const ship = opponent.gameboard.getShipAt(coordinates);
+            this.processHit(opponent, coordinates);
+        } else {
+            this.processMiss();
+        }
+    }
 
-            if (ship.isSunk()) {
-                this.handleSunkShip([...this.shipHits, this.lastHit]);
-            } else {
-                this.shipHits.push(coordinates);
-                this.lastHit = coordinates;
-                this.lastDirection =
-                    this.shipHits.length > 1 ? this.getGeneralDirection(this.shipHits) : null;
-                this.updateAdjacentCells(this.lastHit);
-            }
-        } else if (this.adjacentCells.length === 0) {
+    /**
+     * Process the logic when an attack is a hit.
+     *
+     * @param {Player} opponent - The opponent player.
+     * @param {Array} coordinates - The coordinates of the attack.
+     */
+    processHit(opponent, coordinates) {
+        const ship = opponent.gameboard.getShipAt(coordinates);
+
+        if (ship.isSunk()) {
+            this.handleSunkShip([...this.shipHits, this.lastHit]);
+        } else {
+            this.updateHitState(coordinates);
+        }
+    }
+
+    /**
+     * Processes the logic when an attack is a miss.
+     *
+     */
+    processMiss() {
+        if (this.adjacentCells.length === 0) {
             this.lastDirection = null;
             this.adjacentCells = [];
         }
+    }
+
+    /**
+     * Updates the players's state after a hit.
+     *
+     * @param {Array} coordinates - The coordinates of the hit.
+     */
+    updateHitState(coordinates) {
+        this.shipHits.push(coordinates);
+        this.lastHit = coordinates;
+        this.lastDirection =
+            this.shipHits.length > 1 ? this.getGeneralDirection(this.shipHits) : null;
+        this.updateAdjacentCells(this.lastHit);
     }
 
     /**
@@ -262,31 +288,26 @@ export class Player {
      */
     updateAdjacentCells(lastHit) {
         const possibleCells = this.getAdjacentCells(lastHit);
+        let filteredCells;
 
         if (this.shipHits.length > 1 && this.lastDirection) {
-            // If we have determined a direction, only add cells in that direction
-            const cellsInDirection = this.filterCellsInDirection(possibleCells, this.lastDirection);
-
-            // Merge current adjacentCells with newly filtered cells, ensuring uniqueness
-            this.adjacentCells = Array.from(
-                new Set([
-                    ...this.adjacentCells.map(JSON.stringify),
-                    ...cellsInDirection.map(JSON.stringify),
-                ]).add(JSON.stringify(lastHit))
-            )
-                .map(cell => JSON.parse(cell))
-                .filter(cell => this.isUniqueAttack(cell) && !this.isInNoGoZone(cell));
+            // If a direction is determined, filter adjacent cells in that direction
+            filteredCells = this.filterCellsInDirection(possibleCells, this.lastDirection);
         } else {
-            // Otherwise, add all unique cells that are not in the no-go zone
-            this.adjacentCells = Array.from(
-                new Set([
-                    ...this.adjacentCells.map(JSON.stringify),
-                    ...possibleCells.map(JSON.stringify),
-                ])
-            )
-                .map(cell => JSON.parse(cell))
-                .filter(cell => this.isUniqueAttack(cell) && !this.isInNoGoZone(cell));
+            // No direction determined, consider all adjacent cells
+            filteredCells = possibleCells;
         }
+
+        // Create a Set of stringified cells to ensure uniqueness
+        const uniqueCellSet = new Set([
+            ...this.adjacentCells.map(JSON.stringify),
+            ...filteredCells.map(JSON.stringify),
+        ]);
+
+        // Convert bask to array, parsing JSON strings, and filter out cells
+        this.adjacentCells = Array.from(uniqueCellSet)
+            .map(cell => JSON.parse(cell))
+            .filter(cell => this.isValidAttack(cell));
     }
 
     /**
@@ -358,37 +379,64 @@ export class Player {
     getSurroundingCells(shipCoordinates) {
         const surroundingCells = new Set();
         const letters = 'ABCDEFGHIJ'.split('');
+        let surroundingCoordinates = [];
 
         if (!Array.isArray(shipCoordinates[0])) {
             shipCoordinates = [shipCoordinates];
         }
 
-        for (let coord of shipCoordinates) {
-            const [letter, number] = coord;
-            const letterIndex = letters.indexOf(letter);
-
-            const possibleCells = [
-                letterIndex > 0 ? [letters[letterIndex - 1], number] : null,
-                letterIndex < 9 ? [letters[letterIndex + 1], number] : null,
-                number > 1 ? [letter, number - 1] : null,
-                number < 10 ? [letter, number + 1] : null,
-                letterIndex > 0 && number > 1 ? [letters[letterIndex - 1], number - 1] : null,
-                letterIndex > 0 && number < 10 ? [letters[letterIndex - 1], number + 1] : null,
-                letterIndex < 9 && number > 1 ? [letters[letterIndex + 1], number - 1] : null,
-                letterIndex < 9 && number < 10 ? [letters[letterIndex + 1], number + 1] : null,
-            ];
+        shipCoordinates.forEach(coordinate => {
+            const possibleCells = this.getAdjacentCoordinates(coordinate, letters);
 
             possibleCells.forEach(cell => {
-                if (cell && !shipCoordinates.some(shipCoord => this.arraysEqual(shipCoord, cell))) {
+                if (cell && !this.isPartOfShip(shipCoordinates, cell)) {
                     surroundingCells.add(JSON.stringify(cell));
                 }
             });
-        }
+        });
 
         // Ensure surrounding cells are correctly marked as no-go zones
-        this.noGoZones = new Set([...this.noGoZones, ...Array.from(surroundingCells)]);
+        this.noGoZones = new Set([...this.noGoZones, ...surroundingCells]);
 
-        return Array.from(surroundingCells).map(cell => JSON.parse(cell));
+        surroundingCoordinates = Array.from(surroundingCells).map(cell => JSON.parse(cell));
+
+        return surroundingCoordinates;
+    }
+
+    /**
+     * Get all adjacent cells to a given coordinate.
+     *
+     * @param {Array} coordinate - The coordinate to find adjacent cells for.
+     * @param {Array} letters - The array of board letters.
+     * @returns {Array} - An array of adjacent coordinates
+     */
+    getAdjacentCoordinates(coordinate, letters) {
+        const [letter, number] = coordinate;
+        const letterIndex = letters.indexOf(letter);
+
+        const adjacentCoordinates = [
+            letterIndex > 0 ? [letters[letterIndex - 1], number] : null,
+            letterIndex < 9 ? [letters[letterIndex + 1], number] : null,
+            number > 1 ? [letter, number - 1] : null,
+            number < 10 ? [letter, number + 1] : null,
+            letterIndex > 0 && number > 1 ? [letters[letterIndex - 1], number - 1] : null,
+            letterIndex > 0 && number < 10 ? [letters[letterIndex - 1], number + 1] : null,
+            letterIndex < 9 && number > 1 ? [letters[letterIndex + 1], number - 1] : null,
+            letterIndex < 9 && number < 10 ? [letters[letterIndex + 1], number + 1] : null,
+        ];
+
+        return adjacentCoordinates;
+    }
+
+    /**
+     * Check if a coordinate is part of the ship.
+     *
+     * @param {Array} shipCoordinates - The coordinates of the ship.
+     * @param {Array} cell - The cell to check.
+     * @returns {boolean} - Returns true if cell is part of the ship, otherwise false.
+     */
+    isPartOfShip(shipCoordinates, cell) {
+        return shipCoordinates.some(shipCoord => this.arraysEqual(shipCoord, cell));
     }
 
     /**
