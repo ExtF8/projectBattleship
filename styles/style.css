@@ -42,7 +42,7 @@ header {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    padding-top: 5vw;
+    padding-top: 1vw;
     background-color: var(--medium);
 }
 
@@ -178,14 +178,29 @@ header {
 }
 
 #playerOneGameboard,
-#playerTwoGameboard{
+#playerTwoGameboard {
     display: grid;
     grid-template-columns: repeat(11, 1fr);
     gap: 3px;
 }
 
+.winner {
+    font-size: 48px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-
+.label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border: none;
+    height: 40px;
+    width: 40px;
+}
 
 .cell {
     width: 50px;
@@ -203,16 +218,6 @@ header {
 
 .waitTurn {
     border: 1px solid gray;
-}
-
-.label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    border: none;
-    height: 40px;
-    width: 40px;
 }
 
 .cell-PlayerTwo:not(.marked):hover {
@@ -234,6 +239,11 @@ header {
 
 .cell-miss {
     background-color: yellow;
+}
+
+.disabled {
+    pointer-events: none;
+    opacity: 0.2;
 }
 
 /* Styling for the X symbol */
@@ -271,11 +281,6 @@ header {
 
 /* Mobile - 360px */
 @media only screen and (min-width: 0rem) {
-    .forecast_container {
-        margin-inline: 10px;
-        flex-flow: wrap;
-    }
-
     .main_container {
         margin-bottom: 18vh;
     }

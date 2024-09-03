@@ -4,36 +4,153 @@ import { Ship } from './modules/classes/Ship.js';
 
 import addGridLabels from './modules/dom/domHelper.js';
 
-const startGameButton = document.getElementById('startGame');
+const gameStateButton = document.getElementById('gameStateToggle');
 const randomizeShips = document.getElementById('randomPlacement');
 const playerOneGameboard = document.getElementById('playerOneGameboard');
 const playerTwoGameboard = document.getElementById('playerTwoGameboard');
 
-const GAME = new Game();
-GAME.initializeGame();
+let GAME;
 
-GAME.playerOne.gameboard.placeShipsRandomly(GAME.playerOneShips);
-GAME.playerTwo.gameboard.placeShipsRandomly(GAME.playerTwoShips);
+function initGame() {
+    GAME = new Game();
+    GAME.initializeGame();
 
-renderGameboard(GAME.playerOne.gameboard.grid, playerOneGameboard);
-renderGameboard(GAME.playerTwo.gameboard.grid, playerTwoGameboard);
+    GAME.playerOne.gameboard.placeShipsRandomly(GAME.playerOneShips);
+    GAME.playerTwo.gameboard.placeShipsRandomly(GAME.playerTwoShips);
 
-function startGame() {
-    console.log('start game clicked');
+    renderGameboard(GAME.playerOne.gameboard.grid, playerOneGameboard);
+    renderGameboard(GAME.playerTwo.gameboard.grid, playerTwoGameboard);
 
-    GAME.startGame();
+    // Initialize Game Button State
+    updateButtonLabel();
 
-    if (GAME.hasGameStarted) {
-        startGameButton.innerText = 'End Game';
-    } else {
-        startGameButton.innerText = 'Start New Game';
-    }
-
-    randomizeShips.removeEventListener('click', displayPlacedRandomShips);
-    manageCellEvents(true); // Allow clicks only on Player Two's board
+    return GAME;
 }
 
-startGameButton.addEventListener('click', startGame);
+initGame();
+
+function toggleGameState() {
+    if (GAME.hasGameStarted) {
+        quitGame(); // If the game has already started, quit it
+    } else if (GAME.isGameOver) {
+        endCurrentGame();
+    } else {
+        startGame(); // Otherwise, start a new game
+    }
+}
+
+// Function to start the game
+function startGame() {
+    if (GAME.isGameOver) {
+        endCurrentGame();
+    }
+
+    console.log('Starting game...');
+    GAME.startGame();
+
+    // Enable clicks only on Player Two's board
+    manageCellEvents(true);
+
+    // Disable ship randomization when the game is in progress
+    randomizeShips.removeEventListener('click', displayPlacedRandomShips);
+
+    updateButtonLabel();
+    updateRandomButtonState();
+}
+
+function areYouSureToQuitGame() {
+    // Show confirmation dialog
+    const confirmEndGame = window.confirm(
+        `This will reset all progress.\nAre you sure you want to end the game?`
+    );
+
+    return confirmEndGame;
+}
+
+// Function to end the game
+function quitGame() {
+    // If player cancels the confirmation, return early and do nothing
+    if (!areYouSureToQuitGame()) {
+        return;
+    }
+
+    endCurrentGame();
+}
+
+function endCurrentGame() {
+    console.log('Ending game...');
+    GAME.endGame();
+
+    // Disable cell clicks as the game is no longer active
+    manageCellEvents(false);
+
+    displayPlacedRandomShips();
+    updateButtonLabel();
+    updateRandomButtonState();
+    GAME.resetGame();
+
+    initGame();
+
+    // Re-enable the random ship placement button
+    randomizeShips.addEventListener('click', displayPlacedRandomShips);
+
+    // Reset the game board visually if you want to clear hits, misses, etc.
+    resetGameboardVisuals(playerOneGameboard, 'playerOneShips');
+    resetGameboardVisuals(playerTwoGameboard, 'playerTwoShips');
+}
+
+// Function to update the game button label based on game state
+function updateButtonLabel() {
+    if (GAME.hasGameStarted || GAME.isGameOver) {
+        gameStateButton.textContent = 'End Game';
+    } else {
+        gameStateButton.textContent = 'Start New Game';
+    }
+}
+
+function updateRandomButtonState() {
+    const button = document.getElementById('randomPlacement');
+
+    if (GAME.hasGameStarted) {
+        button.classList.add('disabled');
+        button;
+    } else {
+        button.classList.remove('disabled');
+    }
+}
+
+// Function to reset gameboard visuals
+function resetGameboardVisuals(gridElement, shipElementId) {
+    const playerShips = document.getElementById(shipElementId);
+    const cells = gridElement.querySelectorAll('.cell');
+    const shipElements = playerShips.querySelectorAll('.ship');
+
+    cells.forEach(cell => {
+        cell.classList.remove('marked', 'cell-hit', 'cell-miss', 'waitTurn');
+    });
+
+    shipElements.forEach(shipElement => {
+        const shipBlocks = shipElement.querySelectorAll('.ship-block');
+        const shipTitle = shipElement.querySelector('.ship-title');
+
+        shipBlocks.forEach(block => {
+            block.classList.remove('ship-block-hit');
+            block.classList.add('ship-block-default');
+        });
+
+        shipTitle.classList.remove('ship-title-after-sunk');
+    });
+
+    resetHitsAndMisses();
+    resetWinner();
+}
+
+function resetHitsAndMisses() {
+    updatePlayerOneScore();
+    updatePlayerTwoScore();
+}
+
+gameStateButton.addEventListener('click', toggleGameState);
 
 function displayPlacedRandomShips() {
     GAME.playerOne.gameboard.clearShips();
@@ -96,7 +213,6 @@ function renderGameboard(grid, gridElement) {
     });
 }
 
-
 function manageCellEvents(enable) {
     const cells = playerTwoGameboard.querySelectorAll('.cell');
     cells.forEach(cell => {
@@ -113,53 +229,94 @@ function cellClickHandler(event) {
     const row = parseInt(cell.dataset.row, 10);
     const col = parseInt(cell.dataset.col, 10);
 
-    handleAttack(row, col, playerTwoGameboard);
+    // Ensure that the cell is only clickable once per turn
+    if (cell.classList.contains('marked') || GAME.isGameOver) {
+        return;
+    }
 
-    // Prevent repeated clicks on the same cell by removing the event listener
-    cell.removeEventListener('click', cellClickHandler);
+    handleAttack(row, col, playerTwoGameboard);
 }
 
 function handleAttack(row, col, gridElement) {
     const [x, y] = convertCoordinates(row, col);
+    GAME.takeTurn([x, y]);
 
-    if (gridElement.id === 'playerTwoGameboard') {
-        GAME.takeTurn([x, y]);
+    updateCellUI(row, col, gridElement);
+    updatePlayerOneScore();
+    updatePlayerTwoShipsStats(row, col);
 
-        updateCellUI(row, col, gridElement);
-        updatePlayerOneScore();
-        updatePlayerTwoShipsStats(row, col);
+    manageCellEvents(false);
 
-        manageCellEvents(false);
-
-        togglePlayerTurnState(gridElement, true);
-        setTimeout(() => {
-            handleComputerAttack();
-
-            setTimeout(() => {
-                updatePlayerTwoScore();
-                togglePlayerTurnState(gridElement, false);
-            }, 100);
-        }, 1000);
+    // Check if the game is over after the player one attack
+    if (GAME.currentTurn === GAME.playerOne) {
+        if (checkForWin()) {
+            return;
+        }
     }
+
+    togglePlayerTurnState(gridElement, true);
+
+    setTimeout(() => {
+        handleComputerAttack(gridElement);
+    }, 1000);
 }
 
-function handleComputerAttack() {
+function handleComputerAttack(gridElement) {
+    togglePlayerTurnState(gridElement, false);
     // Handle the computer's turn, which happens inside takeTurn()
-    const lastComputerAttack =
-        GAME.playerTwo.attackHistory[GAME.playerTwo.attackHistory.length - 1];
+    const lastComputerAttack = GAME.playerTwo.attackHistory.slice(-1)[0]; // Get last attack result
+
     if (lastComputerAttack) {
         const [computerRow, computerCol] = convertToGridCoordinates(lastComputerAttack.coordinates);
         updatePlayerOneShipsStats(computerRow, computerCol);
-        // Update Player One's board UI for the computer's attack
+        // Update Player One's board UI after the computer's attack
         updateCellUI(computerRow, computerCol, playerOneGameboard);
+        updatePlayerTwoScore();
     }
+
+    if (checkForWin()) {
+        return;
+    }
+
     manageCellEvents(true);
+}
+
+function checkForWin() {
+    if (GAME.isGameOver) {
+        updateWinner();
+
+        return true;
+    }
+    return false;
+}
+
+function updateWinner() {
+    displayWinner();
+    updateButtonLabel();
+
+    manageCellEvents(false);
+}
+
+function displayWinner() {
+    const winner = document.getElementById('winner');
+    if (GAME.hasWinner) {
+        winner.innerText = `${GAME.winner} Wins`;
+    }
+}
+
+function resetWinner() {
+    const winner = document.getElementById('winner');
+
+    if (!GAME.hasWinner) {
+        winner.textContent = '';
+    }
 }
 
 function updateCellUI(row, col, gridElement) {
     const cellSelector = `.cell[data-row="${row}"][data-col="${col}"]`;
     const cellElement = gridElement.querySelector(cellSelector);
 
+    // Mark the cell as clicked
     cellElement.classList.add('marked');
 
     const grid =
@@ -237,8 +394,11 @@ function updatePlayerShipsStats(player, row, col, shipElementId) {
 
 function togglePlayerTurnState(gridElement, isWaiting) {
     const cells = [...gridElement.childNodes];
+
     cells.forEach(cell => {
-        cell.classList.toggle('waitTurn', isWaiting);
+        if (cell.classList.contains('cell')) {
+            cell.classList.toggle('waitTurn', isWaiting);
+        }
     });
 }
 

@@ -19,6 +19,8 @@ export default class Game {
         this.currentTurn = null;
         this.playerOneShips = [];
         this.playerTwoShips = [];
+        this.hasWinner = false;
+        this.winner = '';
         this.shipManager = new ShipManager();
         Ship.defaultShipManager = this.shipManager;
     }
@@ -27,7 +29,7 @@ export default class Game {
      * Initializes the game by creating players, ships, and setting the starting turn.
      */
     initializeGame() {
-        this.resetGame();
+        // this.resetGame();
         this.hasGameStarted = false;
 
         this.playerOne = new Player(1, 'Human', false);
@@ -38,6 +40,11 @@ export default class Game {
 
     startGame() {
         this.hasGameStarted = true;
+    }
+
+    endGame() {
+        this.hasGameStarted = false;
+        // this.resetGame();
     }
 
     /**
@@ -108,7 +115,7 @@ export default class Game {
      */
     takeTurn(coordinates) {
         if (this.isGameOver) {
-            throw new Error('Game is over');
+            return;
         }
 
         const attackingPlayer = this.currentTurn;
@@ -117,21 +124,16 @@ export default class Game {
         let attackResult;
 
         // Check if it's player one's turn (human)
-        if (attackingPlayer === this.playerOne) {
-            attackResult = attackingPlayer.attack(defendingPlayer, coordinates);
-            // Check for win condition after player's attack
-            if (attackResult) {
-                this.checkForWin(defendingPlayer);
-            }
+        attackResult = attackingPlayer.attack(defendingPlayer, coordinates);
+        // Check for win condition after player's attack
+        if (attackResult) {
+            this.checkForWin(defendingPlayer);
+        }
 
-            // Switch to computer's turn if the game is not over
-            if (!this.isGameOver) {
-                this.switchTurn();
-                this.takeComputerTurn(); // Trigger computer's turn immediately
-            }
-        } else {
-            // It's player two's turn (computer)
-            attackResult = this.takeComputerTurn();
+        // Switch to computer's turn if the game is not over
+        if (!this.isGameOver) {
+            this.switchTurn();
+            this.takeComputerTurn(); // Trigger computer's turn immediately
         }
 
         return attackResult;
@@ -156,7 +158,6 @@ export default class Game {
         if (!this.isGameOver) {
             this.switchTurn();
         }
-
         return attackResult;
     }
 
@@ -178,6 +179,8 @@ export default class Game {
         if (defendingPlayer.gameboard.allShipsSunk()) {
             this.isGameOver = true;
             this.declareWinner(defendingPlayer);
+            this.endGame();
+            return;
         }
     }
 
@@ -188,9 +191,9 @@ export default class Game {
      * @returns {string} The name of the winning player ('Player One' or 'Player Two').
      */
     declareWinner(defendingPlayer) {
-        const winner = defendingPlayer === this.playerOne ? 'Player Two' : 'Player One';
-        console.log(`${winner} wins!`);
-        return winner;
+        this.hasWinner = true;
+        this.winner = defendingPlayer === this.playerOne ? 'Player Two' : 'Player One';
+        return this.winner;
     }
 
     /**
@@ -206,9 +209,12 @@ export default class Game {
     resetGame() {
         this.hasGameStarted = false;
         this.isGameOver = false;
+        if (this.playerOne) this.playerOne.resetScore();
+        if (this.playerTwo) this.playerTwo.resetScore();
+        this.currentTurn = null;
+        this.winner = '';
+        this.shipManager.clearShips();
         this.playerOne = null;
         this.playerTwo = null;
-        this.currentTurn = null;
-        this.shipManager.clearShips();
     }
 }
