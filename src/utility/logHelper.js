@@ -1,4 +1,5 @@
 import { Ship } from '../modules/classes/Ship';
+import { convertCoordinatesToIndices } from './utils';
 
 export function logGrid(gameboard) {
     const letters = 'ABCDEFGHIJ'.split('');
@@ -11,7 +12,7 @@ export function logGrid(gameboard) {
 
             // Check for successful attacks and mark cell
             hit.forEach(([letter, number]) => {
-                const [attackX, attackY] = gameboard.convertCoordinatesToIndices([letter, number]);
+                const [attackX, attackY] = convertCoordinatesToIndices([letter, number]);
                 if (attackX == cellIndex && attackY == rowIndex) {
                     cellValue = cell.title + ' hit';
                 }
@@ -19,7 +20,7 @@ export function logGrid(gameboard) {
 
             // Check for missed attacks and mark cell
             miss.forEach(([letter, number]) => {
-                const [attackX, attackY] = gameboard.convertCoordinatesToIndices([letter, number]);
+                const [attackX, attackY] = convertCoordinatesToIndices([letter, number]);
                 if (attackX == cellIndex && attackY == rowIndex) {
                     cellValue = 'miss';
                 }
