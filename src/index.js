@@ -1,103 +1,120 @@
 import Game from './modules/classes/Game.js';
-import { Gameboard } from './modules/classes/Gameboard.js';
-import { Ship } from './modules/classes/Ship.js';
 
-import addGridLabels from './modules/dom/domHelper.js';
+import { convertCoordinatesToIndices, convertCoordinatesFromIndices } from './utility/utils.js';
 
-const startGameButton = document.getElementById('startGame');
+import {
+    updateButtonLabel,
+    updateRandomButtonState,
+    resetGameboardVisuals,
+    displayPlacedRandomShips,
+    renderGameboard,
+    updateWinner,
+    updateCellUI,
+    updatePlayerOneScore,
+    updatePlayerTwoScore,
+    updatePlayerOneShipsStats,
+    updatePlayerTwoShipsStats,
+} from './modules/dom/gameUi.js';
+
+const gameStateButton = document.getElementById('gameStateToggle');
 const randomizeShips = document.getElementById('randomPlacement');
 const playerOneGameboard = document.getElementById('playerOneGameboard');
 const playerTwoGameboard = document.getElementById('playerTwoGameboard');
 
-const GAME = new Game();
-GAME.initializeGame();
+export let GAME;
 
-GAME.playerOne.gameboard.placeShipsRandomly(GAME.playerOneShips);
-GAME.playerTwo.gameboard.placeShipsRandomly(GAME.playerTwoShips);
-
-renderGameboard(GAME.playerOne.gameboard.grid, playerOneGameboard);
-renderGameboard(GAME.playerTwo.gameboard.grid, playerTwoGameboard);
-
-function startGame() {
-    console.log('start game clicked');
-
-    GAME.startGame();
-
-    if (GAME.hasGameStarted) {
-        startGameButton.innerText = 'End Game';
-    } else {
-        startGameButton.innerText = 'Start New Game';
-    }
-
-    randomizeShips.removeEventListener('click', displayPlacedRandomShips);
-    manageCellEvents(true); // Allow clicks only on Player Two's board
-}
-
-startGameButton.addEventListener('click', startGame);
-
-function displayPlacedRandomShips() {
-    GAME.playerOne.gameboard.clearShips();
-    GAME.playerTwo.gameboard.clearShips();
-    GAME.shipManager.clearPositions();
+function initGame() {
+    GAME = new Game();
+    GAME.initializeGame();
 
     GAME.playerOne.gameboard.placeShipsRandomly(GAME.playerOneShips);
     GAME.playerTwo.gameboard.placeShipsRandomly(GAME.playerTwoShips);
 
     renderGameboard(GAME.playerOne.gameboard.grid, playerOneGameboard);
     renderGameboard(GAME.playerTwo.gameboard.grid, playerTwoGameboard);
+
+    // Initialize Game Button State
+    updateButtonLabel();
+
+    return GAME;
 }
 
+initGame();
+
+gameStateButton.addEventListener('click', toggleGameState);
 randomizeShips.addEventListener('click', displayPlacedRandomShips);
 
-function renderGameboard(grid, gridElement) {
-    gridElement.innerHTML = ''; // Clear any existing content
-
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''); // For column labels
-    const gridSize = grid.length;
-
-    // Create the top row with letters
-    for (let i = 0; i <= gridSize; i++) {
-        const labelElement = document.createElement('div');
-        labelElement.classList.add('label');
-        if (i > 0) {
-            labelElement.textContent = letters[i - 1];
-        }
-        gridElement.appendChild(labelElement);
+function toggleGameState() {
+    if (GAME.hasGameStarted) {
+        quitGame(); // If the game has already started, quit it
+    } else if (GAME.isGameOver) {
+        endCurrentGame();
+    } else {
+        startGame(); // Otherwise, start a new game
     }
-
-    // Create the grid cells with row numbers on the left
-    grid.forEach((row, rowIndex) => {
-        // Add the number label for the row
-        const numberLabel = document.createElement('div');
-        numberLabel.classList.add('label');
-        numberLabel.textContent = rowIndex + 1;
-        gridElement.appendChild(numberLabel);
-
-        row.forEach((cell, colIndex) => {
-            const cellElement = document.createElement('div');
-            cellElement.classList.add('cell');
-
-            cellElement.dataset.row = rowIndex;
-            cellElement.dataset.col = colIndex;
-
-            if (cell === null) {
-                cellElement.classList.add('empty-cell');
-            } else if (cell instanceof Ship) {
-                cellElement.classList.add('ship-cell');
-            }
-
-            if (gridElement.id === 'playerTwoGameboard') {
-                cellElement.classList.add('cell-PlayerTwo');
-                cellElement.classList.remove('ship-cell');
-            }
-
-            gridElement.appendChild(cellElement);
-        });
-    });
 }
 
+// Function to start the game
+function startGame() {
+    if (GAME.isGameOver) {
+        endCurrentGame();
+    }
 
-function manageCellEvents(enable) {
+    console.log('Starting game...');
+    GAME.startGame();
+
+    // Enable clicks only on Player Two's board
+    manageCellEvents(true);
+
+    // Disable ship randomization when the game is in progress
+    randomizeShips.removeEventListener('click', displayPlacedRandomShips);
+
+    updateButtonLabel();
+    updateRandomButtonState();
+}
+
+function areYouSureToQuitGame() {
+    // Show confirmation dialog
+    const confirmEndGame = window.confirm(
+        `This will reset all progress.\nAre you sure you want to end the game?`
+    );
+
+    return confirmEndGame;
+}
+
+// Function to end the game
+function quitGame() {
+    // If player cancels the confirmation, return early and do nothing
+    if (!areYouSureToQuitGame()) {
+        return;
+    }
+
+    endCurrentGame();
+}
+
+function endCurrentGame() {
+    console.log('Ending game...');
+    GAME.endGame();
+
+    // Disable cell clicks as the game is no longer active
+    manageCellEvents(false);
+
+    displayPlacedRandomShips();
+    updateButtonLabel();
+    updateRandomButtonState();
+    GAME.resetGame();
+
+    initGame();
+
+    // Re-enable the random ship placement button
+    randomizeShips.addEventListener('click', displayPlacedRandomShips);
+
+    // Reset the game board visually if you want to clear hits, misses, etc.
+    resetGameboardVisuals(playerOneGameboard, 'playerOneShips');
+    resetGameboardVisuals(playerTwoGameboard, 'playerTwoShips');
+}
+
+export function manageCellEvents(enable) {
     const cells = playerTwoGameboard.querySelectorAll('.cell');
     cells.forEach(cell => {
         if (enable) {
@@ -113,152 +130,76 @@ function cellClickHandler(event) {
     const row = parseInt(cell.dataset.row, 10);
     const col = parseInt(cell.dataset.col, 10);
 
-    handleAttack(row, col, playerTwoGameboard);
-
-    // Prevent repeated clicks on the same cell by removing the event listener
-    cell.removeEventListener('click', cellClickHandler);
-}
-
-function handleAttack(row, col, gridElement) {
-    const [x, y] = convertCoordinates(row, col);
-
-    if (gridElement.id === 'playerTwoGameboard') {
-        GAME.takeTurn([x, y]);
-
-        updateCellUI(row, col, gridElement);
-        updatePlayerOneScore();
-        updatePlayerTwoShipsStats(row, col);
-
-        manageCellEvents(false);
-
-        togglePlayerTurnState(gridElement, true);
-        setTimeout(() => {
-            handleComputerAttack();
-
-            setTimeout(() => {
-                updatePlayerTwoScore();
-                togglePlayerTurnState(gridElement, false);
-            }, 100);
-        }, 1000);
+    // Ensure that the cell is only clickable once per turn
+    if (cell.classList.contains('marked') || GAME.isGameOver) {
+        return;
     }
+
+    handleAttack(col, row, playerTwoGameboard);
 }
 
-function handleComputerAttack() {
+function handleAttack(col, row, gridElement) {
+    const [x, y] = convertCoordinatesFromIndices([col, row]);
+
+    GAME.takeTurn([x, y]);
+
+    updateCellUI(col, row, gridElement);
+    updatePlayerOneScore();
+    updatePlayerTwoShipsStats(col, row);
+
+    manageCellEvents(false);
+
+    // Check if the game is over after the player one attack
+    if (GAME.currentTurn === GAME.playerOne) {
+        if (checkForWin()) {
+            return;
+        }
+    }
+
+    togglePlayerTurnState(gridElement, true);
+
+    setTimeout(() => {
+        handleComputerAttack(gridElement);
+    }, 1000);
+}
+
+function handleComputerAttack(gridElement) {
+    togglePlayerTurnState(gridElement, false);
     // Handle the computer's turn, which happens inside takeTurn()
-    const lastComputerAttack =
-        GAME.playerTwo.attackHistory[GAME.playerTwo.attackHistory.length - 1];
+    const lastComputerAttack = GAME.playerTwo.attackHistory.slice(-1)[0]; // Get last attack result
+
     if (lastComputerAttack) {
-        const [computerRow, computerCol] = convertToGridCoordinates(lastComputerAttack.coordinates);
-        updatePlayerOneShipsStats(computerRow, computerCol);
-        // Update Player One's board UI for the computer's attack
-        updateCellUI(computerRow, computerCol, playerOneGameboard);
+        const [computerCol, computerRow] = convertCoordinatesToIndices(
+            lastComputerAttack.coordinates
+        );
+        updatePlayerOneShipsStats(computerCol, computerRow);
+        // Update Player One's board UI after the computer's attack
+        updateCellUI(computerCol, computerRow, playerOneGameboard);
+        updatePlayerTwoScore();
     }
+
+    if (checkForWin()) {
+        return;
+    }
+
     manageCellEvents(true);
 }
 
-function updateCellUI(row, col, gridElement) {
-    const cellSelector = `.cell[data-row="${row}"][data-col="${col}"]`;
-    const cellElement = gridElement.querySelector(cellSelector);
+function checkForWin() {
+    if (GAME.isGameOver) {
+        updateWinner();
 
-    cellElement.classList.add('marked');
-
-    const grid =
-        gridElement.id === 'playerOneGameboard'
-            ? GAME.playerOne.gameboard.grid
-            : GAME.playerTwo.gameboard.grid;
-
-    const cellContent = grid[row][col];
-
-    if (cellContent instanceof Ship) {
-        cellElement.classList.add('cell-hit');
-    } else {
-        cellElement.classList.add('cell-miss');
+        return true;
     }
-}
-
-// Helper function to update the score for any player
-function updatePlayerScore(player, hitElementId, missElementId) {
-    const hitStats = document.getElementById(hitElementId);
-    const missStats = document.getElementById(missElementId);
-
-    hitStats.innerText = player.hits;
-    missStats.innerText = player.misses;
-}
-
-// Function to update Player One's score
-function updatePlayerOneScore() {
-    updatePlayerScore(GAME.playerOne, 'playerOneHits', 'playerOneMisses');
-}
-
-// Function to update Player Two's score
-function updatePlayerTwoScore() {
-    updatePlayerScore(GAME.playerTwo, 'playerTwoHits', 'playerTwoMisses');
-}
-
-// Function to update Player One's ship stats
-function updatePlayerOneShipsStats(row, col) {
-    updatePlayerShipsStats(GAME.playerOne, row, col, 'playerOneShips');
-}
-
-// Function to update Player Two's ship stats
-function updatePlayerTwoShipsStats(row, col) {
-    updatePlayerShipsStats(GAME.playerTwo, row, col, 'playerTwoShips');
-}
-
-// Helper function to update ship stats for any player
-function updatePlayerShipsStats(player, row, col, shipElementId) {
-    const [x, y] = convertCoordinates(row, col);
-    const ship = player.gameboard.getShipAt([x, y]);
-    const playerShips = document.getElementById(shipElementId);
-
-    if (ship instanceof Ship && ship.hits >= 0) {
-        const shipType = ship.title;
-        const shipElements = playerShips.querySelectorAll('.ship');
-
-        let shipElement = Array.from(shipElements).find(
-            el => el.querySelector('.ship-title').textContent === shipType
-        );
-
-        if (shipElement) {
-            const shipBlocks = shipElement.querySelectorAll('.ship-block');
-            shipBlocks.forEach((block, index) => {
-                if (index < ship.hits) {
-                    block.classList.remove('ship-block-default');
-                    block.classList.add('ship-block-hit');
-                }
-            });
-
-            if (ship.isSunk()) {
-                shipElement.querySelector('.ship-title').classList.add('ship-title-after-sunk');
-            }
-        }
-    }
+    return false;
 }
 
 function togglePlayerTurnState(gridElement, isWaiting) {
     const cells = [...gridElement.childNodes];
+
     cells.forEach(cell => {
-        cell.classList.toggle('waitTurn', isWaiting);
+        if (cell.classList.contains('cell')) {
+            cell.classList.toggle('waitTurn', isWaiting);
+        }
     });
-}
-
-function convertCoordinates(row, col) {
-    const x = indexToLetter(col);
-    const y = row + 1;
-    return [x, y];
-}
-
-function indexToLetter(index) {
-    return String.fromCharCode('A'.charCodeAt(0) + index);
-}
-
-function convertToGridCoordinates(coordinates) {
-    const [x, y] = coordinates;
-    const col = letterToIndex(x);
-    const row = y - 1;
-    return [row, col];
-}
-
-function letterToIndex(letter) {
-    return letter.charCodeAt(0) - 'A'.charCodeAt(0);
 }

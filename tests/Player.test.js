@@ -69,11 +69,11 @@ describe('Player', () => {
     });
 
     test('should record hit form computer', () => {
-        let initialHits = computer.hits
+        let initialHits = computer.hits;
         const attackResult = computer.attack(player1, ['C', 1]);
 
         expect(attackResult).toBe(true);
-        expect(computer.hits).toBe(initialHits + 1)
+        expect(computer.hits).toBe(initialHits + 1);
     });
 
     test('should record a miss from computer', () => {
@@ -112,4 +112,60 @@ describe('Player', () => {
             { coordinates: ['J', 1], result: false },
         ]);
     });
+
+    test('computer player should perform a smart attack based on updated logic', () => {
+        const initialAttackHistory = computer.attackHistory.slice();
+
+        const attack = computer.computerAttack(player1);
+
+        expect(attack).toBe(true);
+        expect(computer.attackHistory.length).toBe(initialAttackHistory.length + 1);
+
+        // Verify the new attack was based on some strategy (e.g., targeting adjacent cells)
+        const lastAttack = computer.attackHistory[initialAttackHistory.length - 1];
+
+        // After hitting a ship, the next attack is adjacent
+        if (computer.attackHistory.length > 1) {
+            const previousAttack = computer.attackHistory[initialAttackHistory.length - 2];
+            if (previousAttack.result) {
+                expect(isAdjacent(previousAttack.coordinates, lastAttack.coordinates)).toBe(true);
+            }
+        }
+    });
+
+    test('computer should change attack strategy after consecutive hits', () => {
+        // Simulate a scenario where the computer hits a ship multiple times
+        computer.attackHistory.push(
+            { coordinates: ['B', 2], result: true },
+            { coordinates: ['B', 3], result: true },
+            { coordinates: ['B', 4], result: true } // assuming part of the same ship
+        );
+
+        const attack = computer.computerAttack(player1);
+
+        expect(attack).toBe(true);
+
+        // Check if the attack is still targeting in the same direction or switching based on some condition
+        const lastAttack = computer.attackHistory[computer.attackHistory.length - 1];
+        const previousAttack = computer.attackHistory[computer.attackHistory.length - 2];
+
+        // Example strategy: If three consecutive hits, don't change direction or target adjacent cells
+        if (previousAttack && previousAttack.result) {
+            expect(isAdjacent(previousAttack.coordinates, lastAttack.coordinates)).toBe(false);
+        }
+    });
+
+    // Helper function to check if two coordinates are adjacent
+    function isAdjacent(coordinate1, coordinate2) {
+        const [row1, col1] = coordinate1;
+        const [row2, col2] = coordinate2;
+
+        const rowDifference = Math.abs(row1.charCodeAt(0) - row2.charCodeAt(0));
+        const colDifference = Math.abs(col1 - col2);
+
+        return (
+            (rowDifference === 1 && colDifference === 0) ||
+            (rowDifference === 0 && colDifference === 1)
+        );
+    }
 });

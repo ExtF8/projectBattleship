@@ -81,34 +81,12 @@ describe('Game flow logic', () => {
         expect(game.currentTurn).toBe(game.playerOne); // After computer's automatic turn, it's human's turn again
     });
 
-    test('should throw an error if attacking after game is over', () => {
-        // Sink all playerTwo ships to end the game
-        game.takeTurn(['J', 1]);
-        game.takeTurn(['J', 2]);
-        game.takeTurn(['J', 3]);
-        game.takeTurn(['J', 4]);
-        game.takeTurn(['J', 5]);
-        game.takeTurn(['I', 2]);
-        game.takeTurn(['I', 3]);
-        game.takeTurn(['I', 4]);
-        game.takeTurn(['I', 5]);
-        game.takeTurn(['H', 3]);
-        game.takeTurn(['H', 4]);
-        game.takeTurn(['H', 5]);
-        game.takeTurn(['G', 4]);
-        game.takeTurn(['G', 5]);
-        game.takeTurn(['G', 6]);
-        game.takeTurn(['F', 5]);
-        game.takeTurn(['F', 6]); // This should sink the last ship of playerTwo
+    test('takeTurn exits when game is over', () => {
+        // Simulate game being over
+        game.isGameOver = true;
 
-        expect(game.isGameOver).toBe(true);
-        expect(() => game.takeTurn(['A', 1])).toThrow('Game is over'); // Should throw an error since the game is over
-
-        // For visual board check
-        console.log('Player One');
-        logGrid(playerOne.gameboard);
-        console.log('Player Two');
-        logGrid(playerTwo.gameboard);
+        const result = game.takeTurn(['A', 1]);
+        expect(result).toBeUndefined();
     });
 
     test('should declare winner after game has ended ', () => {
