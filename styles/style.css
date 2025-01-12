@@ -187,7 +187,7 @@ header {
     font-size: 33px;
     height: 80px;
     display: flex;
-    align-items: center;
+    /* align-items: center; */
     justify-content: center;
 }
 
@@ -215,8 +215,13 @@ header {
     touch-action: manipulation;
 }
 
+.grayedOut {
+    border-color: var(--clouds);
+    pointer-events: none;
+}
+
 .waitTurn {
-    border: 1px solid gray;
+    border: 1px solid var(--clouds);
 }
 
 .cell-PlayerTwo:not(.marked):hover {

@@ -1,11 +1,11 @@
 import { Ship } from '../classes/Ship.js';
-import { convertCoordinatesFromIndices } from '../../utility/utils.js';
+import { convertCoordinatesFromIndices, letterToIndex } from '../../utility/utils.js';
 import { GAME, manageCellEvents } from '../../index.js';
 
 const gameStateButton = document.getElementById('gameStateToggle');
 const playerOneGameboard = document.getElementById('playerOneGameboard');
 const playerTwoGameboard = document.getElementById('playerTwoGameboard');
-
+// TODO: add comments
 // UI
 // Function to update the game button label based on game state
 function updateButtonLabel() {
@@ -173,6 +173,13 @@ function updatePlayerShipsStats(player, col, row, shipElementId) {
 
             if (ship.isSunk()) {
                 shipElement.querySelector('.ship-title').classList.add('ship-title-after-sunk');
+
+                // Gray out surrounding cells
+                const surroundingCoordinates = player.getSurroundingCells(ship.positions);
+                const gridElement = (player === GAME.playerOne) ? playerOneGameboard : playerTwoGameboard;
+                surroundingCoordinates.forEach(([adjX, adjY]) => {
+                    grayOutCell(adjX, adjY, gridElement);
+                });
             }
         }
     }
@@ -235,6 +242,17 @@ function resetWinner() {
         winner.textContent = '';
     }
 }
+
+function grayOutCell(col, row, gridElement) {
+    const convertedCol = letterToIndex(col); // Convert column letter to index
+    const cellSelector = `.cell[data-row="${row - 1}"][data-col="${convertedCol}"]`;
+    const cellElement = gridElement.querySelector(cellSelector);
+
+    if (cellElement) {
+        cellElement.classList.add('grayedOut');
+    }
+}
+
 
 export {
     updateButtonLabel,
