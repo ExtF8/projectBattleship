@@ -110,8 +110,8 @@ export default class Game {
      * Processes an attack at the specified coordinates and updates the game state.
      *
      * @param {Array} coordinates - The coordinates where the attack is to be made (e.g., ['A', 1]).
-     * @returns {boolean} True if the attack was successful; otherwise, false.
-     * @throws {Error} Throws an error if the game is already over.
+     * @returns {boolean|undefined} True if the attack was successful; otherwise, false.
+     *                              Returns undefined if the game is already over.
      */
     takeTurn(coordinates) {
         if (this.isGameOver) {
